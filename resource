@@ -18,22 +18,37 @@
 
 require 'rubygems'
 require 'riddl/server'
-require 'net/smtp'
 
-class DoGet < Riddl::Implementation #{{{
+class DoExists < Riddl::Implementation #{{{
   def response
-    dir = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0] + '//' + @r[1..-1].join('/')))
-    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0] + '//' + @r[1..-2].join('/')),@r.last)
-    case @r.last
-      when 'symbol.svg'
-        return Riddl::Parameter::Complex.new('svg','image/svg+xml',File.read(file)) if File.exists?(file)
-      when 'schema.rng'
-        return Riddl::Parameter::Complex.new('rng','text/xml',File.read(file)) if File.exists?(file)
-      else
-        return Riddl::Parameter::Complex.new('exists','text/plain','There is no means of proving it is preferable to be than not to be. (Emil Cioran)') if Dir.exists?(dir)
+    dir = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]))
+    p dir
+    if Dir.exists?(dir)
+      return Riddl::Parameter::Complex.new('exists','text/plain','There is no means of proving it is preferable to be than not to be. (Emil Cioran)')
+    else
+      @status = 404
+      return Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
     end
-    @status = 404
-    return Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
+  end
+end #}}}
+class DoSchema < Riddl::Implementation #{{{
+  def response
+    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
+    if File.exists?(file)
+      return Riddl::Parameter::Complex.new('rng','text/xml',File.read(file)) if File.exists?(file)
+    else
+      @status = 404
+    end
+  end
+end #}}}
+class DoSymbol < Riddl::Implementation #{{{
+  def response
+    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
+    if File.exists?(file)
+      return Riddl::Parameter::Complex.new('svg','image/svg+xml',File.read(file))
+    else
+      @status = 404
+    end
   end
 end #}}}
 
@@ -49,7 +64,13 @@ Riddl::Server.new(File.join(__dir__,'/resource.xml'), options) do
 
   on resource do
     on resource do
-      run DoGet if get
+      run DoExists if get
+      on resource 'symbol.svg' do
+        run DoSymbol if get
+      end
+      on resource 'schema.rng' do
+        run DoSchema if get
+      end
     end
   end
 end.loop!

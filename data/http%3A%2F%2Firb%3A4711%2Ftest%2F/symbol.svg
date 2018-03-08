@@ -1,0 +1,12 @@
+<g xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="28" height="28" rx="4" class="hfill rfill cline stand"/>
+  <g transform="translate(7,5) scale(1.6)">
+    <path   class="standthin" d="M 0,11.99412 H 10.8"/>
+    <path   class="standthin" d="M 7.5729659,11.849334 3.7361445,6.5646593"/>
+    <path   class="standthin" d="M 3.5189667,11.99412 1.3471788,8.3744804"/>
+    <circle class="standthin" r="1.8098205" cy="6.4612403" cx="1.8746163"/>
+    <path   class="standthin" d="M 3.0122181,5.1168036 6.2698949,2.5830547"/>
+    <path   class="standthin" d="M 6.2698949,2.5830547 H 8.4416803 L 8.8036443,1.4971614"/>
+    <path   class="standthin" d="M 7.3557867,0.04930433 6.2698949,0.4112697 v 2.171785"/>
+  </g>
+</g>

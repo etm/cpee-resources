@@ -17,17 +17,25 @@
 -->
 
 <description xmlns="http://riddl.org/ns/description/1.0" xmlns:ann="http://riddl.org/ns/annotation/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-  <message name="file">
-    <choice>
-      <parameter name="svg" mimetype="image/svg+xml"/>
-      <parameter name="rng" mimetype="*/xml"/>
+  <message name="exists">
       <parameter name="exists" mimetype="text/plain"/>
-    </choice>
+  </message>
+  <message name="symbol">
+      <parameter name="svg" mimetype="image/svg+xml"/>
+  </message>
+  <message name="schema">
+      <parameter name="rng" mimetype="*/xml"/>
   </message>
 
   <resource>
-    <resource recursive="true">
-      <get out="file"/>
+    <resource>
+      <get out="exists"/>
+      <resource relative="symbol.svg">
+        <get out="symbol"/>
+      </resource>
+      <resource relative="schema.rng">
+        <get out="schema"/>
+      </resource>
     </resource>
   </resource>
 </description>
