@@ -22,9 +22,14 @@ require 'riddl/server'
 class DoExists < Riddl::Implementation #{{{
   def response
     dir = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]))
-    p dir
     if Dir.exists?(dir)
-      return Riddl::Parameter::Complex.new('exists','text/plain','There is no means of proving it is preferable to be than not to be. (Emil Cioran)')
+      return Riddl::Parameter::Complex.new('exists','text/xml') do
+        doc = XML::Smart::string('<?xml-stylesheet type="text/xsl" href="' + @h['X_FORWARDED_PREFIX'] + 'xslt/resource.xsl"?><resources/>')
+        doc = XML::Smart::string('<resource/>')
+        doc.root.add('schema','schema.rng') if File.exists?(File.join(dir,'schema.rng'))
+        doc.root.add('symbol','symbol.svg') if File.exists?(File.join(dir,'symbol.svg'))
+        doc.to_s
+      end
     else
       @status = 404
       return Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
@@ -51,6 +56,18 @@ class DoSymbol < Riddl::Implementation #{{{
     end
   end
 end #}}}
+class DoList < Riddl::Implementation #{{{
+  def response
+    dir = File.join(__dir__,'data')
+    return Riddl::Parameter::Complex.new('list','text/xml') do
+      doc = XML::Smart::string('<?xml-stylesheet type="text/xsl" href="' + @h['X_FORWARDED_PREFIX'] + 'xslt/resources.xsl"?><resources/>')
+      Dir.glob(File.join(dir,'*')).each do |f|
+       doc.root.add('resource',File.basename(f))
+      end
+      doc.to_s
+    end
+  end
+end #}}}
 
 options = {
   :host => 'centurio.work',
@@ -63,6 +80,7 @@ Riddl::Server.new(File.join(__dir__,'/resource.xml'), options) do
   cross_site_xhr true
 
   on resource do
+    run DoList if get
     on resource do
       run DoExists if get
       on resource 'symbol.svg' do
