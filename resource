@@ -24,8 +24,7 @@ class DoExists < Riddl::Implementation #{{{
     dir = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]))
     if Dir.exists?(dir)
       return Riddl::Parameter::Complex.new('exists','text/xml') do
-        doc = XML::Smart::string('<?xml-stylesheet type="text/xsl" href="' + @h['X_FORWARDED_PREFIX'] + 'xslt/resource.xsl"?><resources/>')
-        doc = XML::Smart::string('<resource/>')
+        doc = XML::Smart::string('<?xml-stylesheet type="text/xsl" href="' + @h['X_FORWARDED_PREFIX'] + 'xslt/resource.xsl"?><resource/>')
         doc.root.add('schema','schema.rng') if File.exists?(File.join(dir,'schema.rng'))
         doc.root.add('symbol','symbol.svg') if File.exists?(File.join(dir,'symbol.svg'))
         doc.to_s
