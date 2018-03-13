@@ -1,0 +1,19 @@
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="to-program" rngui:label="To">
+    <data type="string" rngui:label="comma separated mail addresses"/>
+  </element>
+  <element name="subject" rngui:label="Subject">
+    <data type="string" rngui:label="Subject"/>
+  </element>
+  <element name="text" rngui:label="Text">
+    <text rngui:label="Use %%ui%% to add link to ui, %%info%% to insert info element below"/>
+  </element>
+  <element name="infos" rngui:header="Info">
+    <zeroOrMore rngui:label="Add info">
+      <element rngui:label='Name'>
+        <anyName/>
+        <data type="string" rngui:label="Value"/>
+      </element>
+    </zeroOrMore>
+  </element>
+</element>
