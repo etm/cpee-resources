@@ -8,12 +8,13 @@
   <element name="text" rngui:label="Text">
     <text rngui:label="Use %%ui%% to add link to ui, %%info%% to insert info element below"/>
   </element>
-  <element name="infos" rngui:header="Info">
-    <zeroOrMore rngui:label="Add info">
-      <element rngui:label='Name'>
-        <anyName/>
-        <data type="string" rngui:label="Value"/>
-      </element>
-    </zeroOrMore>
+  <element name="subject" rngui:label="Amount">
+    <data type="string" rngui:label="Number of items"/>
+  </element>
+  <element name="subject" rngui:label="Delivery Date">
+    <data type="string"/>
+  </element>
+  <element name="subject" rngui:label="Due Date">
+    <data type=""/>
   </element>
 </element>
