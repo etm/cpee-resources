@@ -1,5 +1,5 @@
 <element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
-  <element name="to-program" rngui:label="To">
+  <element name="to" rngui:label="To">
     <data type="string" rngui:label="comma separated mail addresses"/>
   </element>
   <element name="subject" rngui:label="Subject">
@@ -8,13 +8,13 @@
   <element name="text" rngui:label="Text">
     <text rngui:label="Use %%ui%% to add link to ui, %%info%% to insert info element below"/>
   </element>
-  <element name="subject" rngui:label="Amount">
+  <element name="amount" rngui:label="Amount">
     <data type="string" rngui:label="Number of items"/>
   </element>
-  <element name="subject" rngui:label="Delivery Date">
-    <data type="string"/>
+  <element name="delivery" rngui:label="Delivery Date">
+    <data type="date" rngui:label="Delivery"/>
   </element>
-  <element name="subject" rngui:label="Due Date">
-    <data type=""/>
+  <element name="due" rngui:label="Due Date">
+    <data type="date" rngui:label="Due"/>
   </element>
 </element>
