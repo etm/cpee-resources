@@ -11,6 +11,9 @@
   <element name="result-pic" rngui:label="Result Picture">
     <data type="string" rngui:label="Picture of the result"/>
   </element>
+  <element name="setup-pic" rngui:label="Setup Picture">
+    <data type="string" rngui:label="Picture of the finished setup"/>
+  </element>
   <element name="comment" rngui:label="Comment">
     <text rngui:wrap='true' rngui:label='Additional comments for the operator'/>
   </element>
