@@ -1,2 +1,24 @@
 <element rngui:version="1.2" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="measurements" rngui:header="Measurements">
+    <zeroOrMore rngui:label="Add Measurement">
+      <element name="measurement" rngui:header="Measurement">
+        <element name="label" rngui:label="Label">
+          <data type="string" rngui:label="Name of the measurement"/>
+        </element>
+        <element name="value" rngui:label="Default value">
+          <data type="string" rngui:label="Default value"/>
+        </element>
+        <element name="datatype" rngui:label="Data type">
+          <choice>
+            <value>text</value>
+            <value>number</value>
+            <value>checkbox</value>
+            <value>date</value>
+            <value>time</value>
+            <value>datetime-local</value>
+          </choice>
+        </element>
+      </element>
+    </zeroOrMore>
+  </element>
 </element>
