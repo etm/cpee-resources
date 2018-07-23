@@ -13,9 +13,12 @@
             <value>text</value>
             <value>number</value>
             <value>checkbox</value>
+            <value>select</value>
             <value>date</value>
             <value>time</value>
             <value>datetime-local</value>
+            <value>file</value>
+            <value>email</value>
           </choice>
         </element>
       </element>
