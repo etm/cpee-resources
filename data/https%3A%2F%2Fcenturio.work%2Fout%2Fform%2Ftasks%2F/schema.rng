@@ -1,0 +1,27 @@
+<element rngui:version="1.2" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="elements" rngui:header="Form Elements">
+    <zeroOrMore rngui:label="Add Elements">
+      <element name="element" rngui:header="Element">
+        <element name="label" rngui:label="Label">
+          <data type="string" rngui:label="Name of the element"/>
+        </element>
+        <element name="value" rngui:label="Default value">
+          <data type="string" rngui:label="Default value"/>
+        </element>
+        <element name="datatype" rngui:label="Data type">
+          <choice>
+            <value>text</value>
+            <value>number</value>
+            <value>checkbox</value>
+            <value>select</value>
+            <value>date</value>
+            <value>time</value>
+            <value>datetime-local</value>
+            <value>file</value>
+            <value>email</value>
+          </choice>
+        </element>
+      </element>
+    </zeroOrMore>
+  </element>
+</element>
