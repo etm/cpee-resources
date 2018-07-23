@@ -19,6 +19,7 @@
             <value>datetime-local</value>
             <value>file</value>
             <value>email</value>
+            <value>color</value>
           </choice>
         </element>
       </element>
