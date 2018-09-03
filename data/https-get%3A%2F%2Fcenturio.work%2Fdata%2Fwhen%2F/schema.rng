@@ -5,4 +5,7 @@
   <element name="program" rngui:label="Program">
     <data type="string" rngui:label="Program name, e.g. _N_INTERTOOL_KULI_GRIFFROHR_MPF"/>
   </element>
+  <element name="refinement" rngui:label="Refinement">
+    <data type="string" rngui:label="yes, or empty"/>
+  </element>
 </element>
