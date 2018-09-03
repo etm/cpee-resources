@@ -1,0 +1,8 @@
+<element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="machine" rngui:label="Machine">
+    <data type="string" rngui:label="Machine name, e.g. MaxxMill500"/>
+  </element>
+  <element name="program" rngui:label="Program">
+    <data type="string" rngui:label="Program name, e.g. _N_INTERTOOL_KULI_GRIFFROHR_MPF"/>
+  </element>
+</element>
