@@ -17,7 +17,11 @@
         <element name="datatype" rngui:label="Data type">
           <choice>
             <value>text</value>
-            <value>number</value>
+            <value>number 1</value>
+            <value>number 0.1</value>
+            <value>number 0.01</value>
+            <value>number 0.001</value>
+            <value>number 0.0001</value>
             <value>checkbox</value>
             <value>select</value>
             <value>date</value>
