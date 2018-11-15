@@ -1,5 +1,11 @@
-<element rngui:version="1.2" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
-  <element name="measurements" rngui:header="Measurements">
+<element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="what" rngui:label="What">
+    <data type="string" rngui:label="What part is to be measured"/>
+  </element>
+  <element name="info" rngui:label="Info">
+    <data type="string" rngui:label="Further info to identify the part, that has to be measured"/>
+  </element>
+  <element name="measurements" rngui:header="Predefined Measurements">
     <zeroOrMore rngui:label="Add Measurement">
       <element name="measurement" rngui:header="Measurement">
         <element name="label" rngui:label="Label">
