@@ -2,6 +2,9 @@
   <element name="id" rngui:label="Identification">
     <data type="string" rngui:label="Unique ID of the message exchange slot"/>
   </element>
+  <element name="message" rngui:label="Message">
+    <text rngui:label="Message to send"/>
+  </element>
   <element name="ttl" rngui:label="Time to live" rngui:default="0" rngui:hint="0 for message to live forever.">
     <data type="nonNegativeInteger" rngui:label="Time to live in seconds"/>
   </element>
