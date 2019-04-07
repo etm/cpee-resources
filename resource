@@ -68,13 +68,7 @@ class DoList < Riddl::Implementation #{{{
   end
 end #}}}
 
-options = {
-  :host => 'centurio.work',
-  :port => 9303,
-  :secure => false
-}
-
-Riddl::Server.new(File.join(__dir__,'/resource.xml'), options) do
+Riddl::Server.new(File.join(__dir__,'/resource.xml'), :host => 'localhost', :port => 9303) do
   accessible_description true
   cross_site_xhr true
 
