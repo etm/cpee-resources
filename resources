@@ -68,7 +68,7 @@ class DoList < Riddl::Implementation #{{{
   end
 end #}}}
 
-Riddl::Server.new(File.join(__dir__,'/resource.xml'), :host => 'localhost', :port => 9303) do
+Riddl::Server.new(File.join(__dir__,'/resources.xml'), :host => 'localhost', :port => 9303) do
   accessible_description true
   cross_site_xhr true
 
