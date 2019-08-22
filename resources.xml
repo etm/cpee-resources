@@ -32,6 +32,9 @@
   <message name="schema">
     <parameter name="rng" mimetype="*/xml"/>
   </message>
+  <message name="properties">
+    <parameter name="json" mimetype="application/json"/>
+  </message>
 
   <resource>
     <get out="list"/>
@@ -42,6 +45,9 @@
       </resource>
       <resource relative="schema.rng">
         <get out="schema"/>
+      </resource>
+      <resource relative="properties.json">
+        <get out="properties"/>
       </resource>
     </resource>
   </resource>

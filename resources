@@ -27,6 +27,7 @@ class DoExists < Riddl::Implementation #{{{
         doc = XML::Smart::string('<?xml-stylesheet type="text/xsl" href="' + @h['X_FORWARDED_PREFIX'] + 'xslt/resource.xsl"?><resource/>')
         doc.root.add('schema','schema.rng') if File.exists?(File.join(dir,'schema.rng'))
         doc.root.add('symbol','symbol.svg') if File.exists?(File.join(dir,'symbol.svg'))
+        doc.root.add('properties','properties.json') if File.exists?(File.join(dir,'properties.json'))
         doc.to_s
       end
     else
@@ -50,6 +51,16 @@ class DoSymbol < Riddl::Implementation #{{{
     file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
     if File.exists?(file)
       return Riddl::Parameter::Complex.new('svg','image/svg+xml',File.read(file))
+    else
+      @status = 404
+    end
+  end
+end #}}}
+class DoProperties < Riddl::Implementation #{{{
+  def response
+    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
+    if File.exists?(file)
+      return Riddl::Parameter::Complex.new('json','application/json',File.read(file))
     else
       @status = 404
     end
@@ -81,6 +92,9 @@ Riddl::Server.new(File.join(__dir__,'/resources.xml'), :host => 'localhost', :po
       end
       on resource 'schema.rng' do
         run DoSchema if get
+      end
+      on resource 'properties.json' do
+        run DoProperties if get
       end
     end
   end
