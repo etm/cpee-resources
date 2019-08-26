@@ -13,8 +13,16 @@
   <element name="url" rngui:label="Process">
     <data type="string" rngui:label="Link to centurio.work testset"/>
   </element>
-  <element name="init" rngui:header="Initialize">
-    <zeroOrMore rngui:label="New Argument Pair">
+  <element name="init" rngui:header="Initialize Data Elements">
+    <zeroOrMore rngui:label="New Data Element">
+      <element rngui:label='Name'>
+        <anyName/>
+        <data type="string" rngui:label="Value"/>
+      </element>
+    </zeroOrMore>
+  </element>
+  <element name="endpoints" rngui:header="Initialize Endpoints">
+    <zeroOrMore rngui:label="New Endpoint">
       <element rngui:label='Name'>
         <anyName/>
         <data type="string" rngui:label="Value"/>
