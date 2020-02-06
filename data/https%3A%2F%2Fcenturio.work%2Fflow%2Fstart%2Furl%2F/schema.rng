@@ -29,4 +29,16 @@
       </element>
     </zeroOrMore>
   </element>
+  <element name="stream" rngui:header="Stream Handling per Task">
+    <zeroOrMore rngui:label="For Task">
+      <element name="task">
+        <element name="id" rngui:label="Task ID">
+          <data type="string" rngui:label="e.g. a1"/>
+        </element>
+        <element name="url" rngui:label="Url">
+          <data type="string" rngui:label="Link to sensor file"/>
+        </element>
+      </element>
+    </zeroOrMore>
+  </element>
 </element>
