@@ -1,1 +1,13 @@
-<element rngui:version="1.2" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org"/>
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="behavior" rngui:label="Mode">
+    <choice>
+      <value>wait_running</value>
+      <value>fork_running</value>
+      <value>wait_ready</value>
+      <value>fork_ready</value>
+    </choice>
+  </element>
+  <element name="url" rngui:label="Process">
+    <choice href="../design/server/" extract="_.map(data,function(n){ return [n['name'],'../design/server/' + n['name']]; });"/>
+  </element>
+</element>
