@@ -1,0 +1,17 @@
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="from" rngui:label="From">
+    <data type="string" rngui:label="URL to get data from"/>
+  </element>
+  <element name="to" rngui:label="To">
+    <data type="string" rngui:label="URL to send data to send to with put or post"/>
+  </element>
+  <element name="operation" rngui:label="Operation">
+    <choice>
+      <value>post</value>
+      <value>put</value>
+    </choice>
+  </element>
+  <element name="parameter" rngui:label="Parameter">
+    <data type="string" rngui:label="Name of the parameter to send the data to"/>
+  </element>
+</element>
