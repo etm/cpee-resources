@@ -26,14 +26,22 @@
       </element>
     </zeroOrMore>
   </element>
-  <element name="stream" rngui:header="Stream Handling per Task">
+  <element name="customization" rngui:header="Task Customization">
     <zeroOrMore rngui:label="For Task">
       <element name="task">
         <element name="id" rngui:label="Task ID">
           <data type="string" rngui:label="e.g. a1"/>
         </element>
+        <element name="id" rngui:label="Replace What?">
+          <choice>
+            <value id="parameters/stream/sensors">Properties &gt; Data Stream Handling &gt; Sensors</value>
+            <value id="parameters/stream/ips">Properties &gt; Data Stream Handling &gt; Impact Profiles</value>
+            <value id="parameters/report">Properties &gt; Reports</value>
+            <value id="annotations/_timing">Annotations &gt; Timing</value>
+          </choice>
+        </element>
         <element name="url" rngui:label="Url">
-          <data type="string" rngui:label="Link to sensor file"/>
+          <data type="string" rngui:label="Link to replacement file"/>
         </element>
       </element>
     </zeroOrMore>

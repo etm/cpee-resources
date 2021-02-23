@@ -1,0 +1,8 @@
+<element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="id" rngui:label="Identification">
+    <data type="string" rngui:label="Unique ID of the message exchange slot"/>
+  </element>
+  <element name="ttl" rngui:label="Time to live" rngui:default="0" rngui:hint="0 for message to live forever.">
+    <data type="nonNegativeInteger" rngui:label="Time to live in seconds"/>
+  </element>
+</element>

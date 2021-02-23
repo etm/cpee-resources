@@ -1,0 +1,35 @@
+<element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="machine" rngui:label="Topic">
+    <data type="string" rngui:label="Topic that triggers batching, e.g. MaxxMill500"/>
+  </element>
+  <element name="program_path" rngui:label="Identifier">
+    <data type="string" rngui:label="Empty, or for machines e.g. Program/progName1"/>
+  </element>
+  <element name="program_value" rngui:label="Identifier Value">
+    <data type="string" rngui:label="Empty, or depends on identifier e.g. _N_INTERTOOL_KULI_GRIFFROHR_MPF"/>
+  </element>
+  <element name="trigger_path" rngui:label="Trigger Path">
+    <data type="string" rngui:label="e.g. State/ProgStatus"/>
+  </element>
+  <element name="trigger_start_value" rngui:label="Trigger Start">
+    <data type="string" rngui:label="Depends on vales in Trigger Path e.g. 3"/>
+  </element>
+  <element name="trigger_pause_value" rngui:label="Trigger Pause">
+    <data type="string" rngui:label="Depends on vales in Trigger Path e.g. 2"/>
+  </element>
+  <element name="trigger_end_value" rngui:label="Trigger End">
+    <data type="string" rngui:label="Depends on vales in Trigger Path e.g. 5"/>
+  </element>
+  <element name="target" rngui:label="Target Topic">
+    <data type="string" rngui:label="Where to collect data from, e.g. MaxxMill500"/>
+  </element>
+  <element name="event_batch" rngui:label="Batching">
+    <data type="integer" rngui:label="How many messages are batched into an event, e.g. 300. Depends on velocity."/>
+  </element>
+  <element name="refinement" rngui:label="Refinement">
+    <choice>
+      <value>no</value>
+      <value>yes</value>
+    </choice>
+  </element>
+</element>
