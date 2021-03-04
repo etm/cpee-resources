@@ -1,0 +1,22 @@
+<element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="style_url" rngui:label="Style URL">
+    <data type="string" rngui:label="Where to display content"/>
+  </element>
+  <element name="document_url" rngui:label="Document URL">
+    <data type="string" rngui:label="Where to display content"/>
+  </element>
+  <element name="x_amount" rngui:label="Width">
+    <data type="string" rngui:label="Width of content"/>
+  </element>
+  <element name="y_amount" rngui:label="Height">
+    <data type="string" rngui:label="Height of content"/>
+  </element>
+  <element name="lang" rngui:label='Language' rngui:default='de-at'>
+    <choice>
+      <value>de-at</value>
+      <value>en-uk</value>
+      <value>cs</value>
+      <value>pl</value>
+    </choice>
+  </element>
+</element>

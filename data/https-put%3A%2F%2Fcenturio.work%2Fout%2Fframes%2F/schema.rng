@@ -1,0 +1,48 @@
+<element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="type" rngui:label='Type' rngui:default='set'>
+    <choice>
+      <value id="set">Set UI and continue</value>
+      <value id="wait">Set UI and wait for input</value>
+    </choice>
+  </element>
+  <element name="lx" rngui:label="Displacement left">
+    <data type="nonNegativeInteger" rngui:label="Where to display content"/>
+  </element>
+  <element name="ly" rngui:label="Displacement top">
+    <data type="nonNegativeInteger" rngui:label="Where to display content"/>
+  </element>
+  <element name="x_amount" rngui:label="Width">
+    <data type="nonNegativeInteger" rngui:label="Width of content"/>
+  </element>
+  <element name="y_amount" rngui:label="Height">
+    <data type="nonNegativeInteger" rngui:label="Height of content"/>
+  </element>
+  <element name="button" rngui:label="Button">
+    <data type="string" rngui:label="When empty, no button, else this is the button text"/>
+  </element>
+  <element name="urls" rngui:header="Form Url">
+    <zeroOrMore rngui:label="New Language">
+      <element name="urls_item">
+        <element name="lang" rngui:label='Language' rngui:default='de-at'>
+          <choice>
+            <value>de-at</value>
+            <value>en-uk</value>
+            <value>cs</value>
+            <value>pl</value>
+          </choice>
+        </element>
+        <element name="url" rngui:label='Url'>
+          <data type="string" rngui:label="Url to UI (e.g. https://centurio.work/out/forms/*/"/>
+        </element>
+      </element>
+    </zeroOrMore>
+  </element>
+  <element name="default" rngui:header="Default Values">
+    <zeroOrMore rngui:label="New Pair">
+      <element rngui:label='Name'>
+        <anyName/>
+        <data type="string" rngui:label="Value"/>
+      </element>
+    </zeroOrMore>
+  </element>
+</element>
