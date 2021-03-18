@@ -20,6 +20,9 @@
   <element name="button" rngui:label="Button">
     <data type="string" rngui:label="When empty, no button, else this is the button text"/>
   </element>
+  <element name="style" rngui:label="Style">
+    <data type="string" rngui:label="When empty, no style, else this style is injected"/>
+  </element>
   <element name="urls" rngui:header="Form Url">
     <zeroOrMore rngui:label="New Language">
       <element name="urls_item">
