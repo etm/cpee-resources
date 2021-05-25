@@ -19,7 +19,7 @@
       <value>pl</value>
     </choice>
   </element>
-  <element name="document_name" rngui:label="Name">
-    <data type="string" rngui:label="Name"/>
+  <element name="document_name" rngui:label="Title">
+    <data type="string" rngui:label="Enter Frame Title"/>
   </element>
 </element>
