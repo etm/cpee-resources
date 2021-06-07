@@ -37,17 +37,34 @@
   </message>
 
   <resource>
-    <get out="list"/>
-    <resource>
-      <get out="exists"/>
-      <resource relative="symbol.svg">
-        <get out="symbol"/>
+    <resource relative='hardware'>
+      <get out="list"/>
+      <resource>
+        <get out="exists"/>
+        <resource relative="ui.rng">
+          <get out="symbol"/>
+        </resource>
+        <resource relative="remove.xml">
+          <get out="schema"/>
+        </resource>
+        <resource relative="patch.xml">
+          <get out="properties"/>
+        </resource>
       </resource>
-      <resource relative="schema.rng">
-        <get out="schema"/>
-      </resource>
-      <resource relative="properties.json">
-        <get out="properties"/>
+    </resource>
+    <resource relative='endpoints'>
+      <get out="list"/>
+      <resource>
+        <get out="exists"/>
+        <resource relative="symbol.svg">
+          <get out="symbol"/>
+        </resource>
+        <resource relative="schema.rng">
+          <get out="schema"/>
+        </resource>
+        <resource relative="properties.json">
+          <get out="properties"/>
+        </resource>
       </resource>
     </resource>
   </resource>

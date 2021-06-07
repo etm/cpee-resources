@@ -1,0 +1,13 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <subscriptions>
+    <subscription url="http://tango.wst.univie.ac.at:9332" id='rex'>
+      <votes topic="state">change</votes>
+      <events topic="state">change</events>
+      <events topic="task">instantiation</events>
+    </subscription>
+  </subscriptions>
+  <attributes>
+    <resource_restriction>%s1</resource_restriction>
+    <resource_id>%s1</resource_id>
+  </attributes>
+</testset>

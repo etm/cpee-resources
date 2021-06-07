@@ -1,0 +1,13 @@
+http-get%3A%2F%2Fryloth.wst.univie.ac.at%3A9329%2Fview%2Fdetails
+http-get%3A%2F%2Fryloth.wst.univie.ac.at%3A9329%2Fview%2Fitems
+http-get%3A%2F%2Ftango.wst.univie.ac.at%3A9329%2Fview%2Fdetails/
+http-get%3A%2F%2Ftango.wst.univie.ac.at%3A9329%2Fview%2Fitems/
+http-put%3A%2F%2Fryloth.wst.univie.ac.at%3A9329%2Fmove%2Fgrip_and_place
+http-put%3A%2F%2Fryloth.wst.univie.ac.at%3A9329%2Fmove%2Foverview
+http-put%3A%2F%2Fryloth.wst.univie.ac.at%3A9329%2Fmove%2Fposition%2Fpoint
+http-put%3A%2F%2Fryloth.wst.univie.ac.at%3A9329%2Fmove%2Fposition%2Fview
+http-put%3A%2F%2Ftango.wst.univie.ac.at%3A9329%2Fmove%2Fgrip_and_place/
+http-put%3A%2F%2Ftango.wst.univie.ac.at%3A9329%2Fmove%2Foverview/
+http-put%3A%2F%2Ftango.wst.univie.ac.at%3A9329%2Fmove%2Fposition%2Fpoint/
+http-put%3A%2F%2Ftango.wst.univie.ac.at%3A9329%2Fmove%2Fposition%2Fview/
+https-put%3A%2F%2Fcpee.org%2Fstartmining%2F/

@@ -1,0 +1,5 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <subscriptions>
+    <subscription id='rex'/>
+  </subscriptions>
+</testset>

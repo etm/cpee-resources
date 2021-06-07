@@ -21,7 +21,7 @@ require 'riddl/server'
 
 class DoExists < Riddl::Implementation #{{{
   def response
-    dir = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]))
+    dir = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[0]))
     if Dir.exists?(dir)
       return Riddl::Parameter::Complex.new('exists','text/xml') do
         doc = XML::Smart::string('<resource/>')
@@ -38,7 +38,7 @@ class DoExists < Riddl::Implementation #{{{
 end #}}}
 class DoSchema < Riddl::Implementation #{{{
   def response
-    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
+    file = File.join(__dir__,'data',@a[[0],Riddl::Protocols::Utils::escape(@r[0]),@r.last)
     if File.exists?(file)
       return Riddl::Parameter::Complex.new('rng','text/xml',File.read(file)) if File.exists?(file)
     else
@@ -48,7 +48,7 @@ class DoSchema < Riddl::Implementation #{{{
 end #}}}
 class DoSymbol < Riddl::Implementation #{{{
   def response
-    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
+    file = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[0]),@r.last)
     if File.exists?(file)
       return Riddl::Parameter::Complex.new('svg','image/svg+xml',File.read(file))
     else
@@ -58,7 +58,7 @@ class DoSymbol < Riddl::Implementation #{{{
 end #}}}
 class DoProperties < Riddl::Implementation #{{{
   def response
-    file = File.join(__dir__,'data',Riddl::Protocols::Utils::escape(@r[0]),@r.last)
+    file = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[0]),@r.last)
     if File.exists?(file)
       return Riddl::Parameter::Complex.new('json','application/json',File.read(file))
     else
@@ -68,7 +68,7 @@ class DoProperties < Riddl::Implementation #{{{
 end #}}}
 class DoList < Riddl::Implementation #{{{
   def response
-    dir = File.join(__dir__,'data')
+    dir = File.join(__dir__,'data',@a[0])
     return Riddl::Parameter::Complex.new('list','text/xml') do
       doc = XML::Smart::string('<resources/>')
       Dir.glob(File.join(dir,'*')).each do |f|
@@ -84,17 +84,25 @@ Riddl::Server.new(File.join(__dir__,'/resources.xml'), :host => 'localhost', :po
   cross_site_xhr true
 
   on resource do
-    run DoList if get
-    on resource do
-      run DoExists if get
-      on resource 'symbol.svg' do
-        run DoSymbol if get
+    on resource 'modifieres' do
+      run DoList, 'modifiers' if get
+      on resource do
+        run DoExists, 'modifiers' if get
       end
-      on resource 'schema.rng' do
-        run DoSchema if get
-      end
-      on resource 'properties.json' do
-        run DoProperties if get
+    end
+    on resource 'endpoints' do
+      run DoList, 'endpoints' if get
+      on resource do
+        run DoExists, 'endpoints' if get
+        on resource 'symbol.svg' do
+          run DoSymbol, 'endpoints' if get
+        end
+        on resource 'schema.rng' do
+          run DoSchema, 'endpoints' if get
+        end
+        on resource 'properties.json' do
+          run DoProperties, 'endpoints' if get
+        end
       end
     end
   end
