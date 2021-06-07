@@ -1,6 +1,6 @@
 <element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
   <element name="style_url" rngui:label="Style URL">
-    <data type="string" rngui:label="Where to display content"/>
+    <data type="string" rngui:label="Optional Style URL"/>
   </element>
   <element name="document_url" rngui:label="Document URL">
     <data type="string" rngui:label="Where to display content"/>
@@ -18,5 +18,8 @@
       <value>cs</value>
       <value>pl</value>
     </choice>
+  </element>
+  <element name="document_name" rngui:label="Title">
+    <data type="string" rngui:label="Enter Frame Title"/>
   </element>
 </element>
