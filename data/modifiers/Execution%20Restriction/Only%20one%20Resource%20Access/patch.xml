@@ -7,7 +7,7 @@
     </subscription>
   </subscriptions>
   <attributes>
-    <resource_restriction>%s1</resource_restriction>
+    <resource_restriction>rex</resource_restriction>
     <resource_id>%s1</resource_id>
   </attributes>
 </testset>

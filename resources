@@ -32,43 +32,43 @@ class DoExists < Riddl::Implementation #{{{
       end
     else
       @status = 404
-      return Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
+      Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
     end
   end
 end #}}}
-class DoSchema < Riddl::Implementation #{{{
+class DoModExists < Riddl::Implementation #{{{
   def response
-    file = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[-2]),@r[-1])
-    if File.exists?(file)
-      return Riddl::Parameter::Complex.new('rng','text/xml',File.read(file)) if File.exists?(file)
+    dir = File.join(__dir__,'data','modifiers',Riddl::Protocols::Utils::escape(@r[-2]),Riddl::Protocols::Utils::escape(@r[-1]))
+    if Dir.exists?(dir)
+      Riddl::Parameter::Complex.new('exists','text/xml') do
+        doc = XML::Smart::string('<resource/>')
+        doc.root.add('patch','patch.xml') if File.exists?(File.join(dir,'patch.xml'))
+        doc.root.add('unpatch','unpatch.xml') if File.exists?(File.join(dir,'unpatch.xml'))
+        doc.root.add('condition','condition.json') if File.exists?(File.join(dir,'condition.json'))
+        doc.root.add('ui','ui.rng') if File.exists?(File.join(dir,'ui.rng'))
+        doc.to_s
+      end
     else
       @status = 404
+      Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
     end
   end
 end #}}}
-class DoSymbol < Riddl::Implementation #{{{
+class DoFile < Riddl::Implementation #{{{
   def response
-    file = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[-2]),@r[-1])
+    file = File.join(__dir__,'data',@a[0],*(@r[@a[1]].map{|e| Riddl::Protocols::Utils::escape(e)}))
     if File.exists?(file)
-      return Riddl::Parameter::Complex.new('svg','image/svg+xml',File.read(file))
+      Riddl::Parameter::Complex.new(@a[2],@a[3],File.read(file)) if File.exists?(file)
     else
       @status = 404
-    end
-  end
-end #}}}
-class DoProperties < Riddl::Implementation #{{{
-  def response
-    file = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[-2]),@r[-1])
-    if File.exists?(file)
-      return Riddl::Parameter::Complex.new('json','application/json',File.read(file))
-    else
-      @status = 404
+      Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
     end
   end
 end #}}}
 class DoList < Riddl::Implementation #{{{
   def response
-    dir = File.join(__dir__,'data',@a[0])
+    @a[1] ||= 0...0
+    dir = File.join(__dir__,'data',@a[0],*(@r[@a[1]].map{|e| Riddl::Protocols::Utils::escape(e)}))
     return Riddl::Parameter::Complex.new('list','text/xml') do
       doc = XML::Smart::string('<resources/>')
       Dir.glob(File.join(dir,'*')).each do |f|
@@ -84,10 +84,25 @@ Riddl::Server.new(File.join(__dir__,'/resources.xml'), :host => 'localhost', :po
   cross_site_xhr true
 
   on resource do
-    on resource 'modifieres' do
+    on resource 'modifiers' do
       run DoList, 'modifiers' if get
       on resource do
-        run DoExists, 'modifiers' if get
+        run DoList, 'modifiers', (-1..-1) if get
+        on resource do
+          run DoModExists, 'modifiers' if get
+          on resource 'patch.xml' do
+            run DoFile, 'modifiers', (-3..-1), 'testset', 'text/xml' if get
+          end
+          on resource 'unpatch.xml' do
+            run DoFile, 'modifiers', (-3..-1), 'testset', 'text/xml' if get
+          end
+          on resource 'condition.json' do
+            run DoFile, 'modifiers', (-3..-1), 'json', 'application/json' if get
+          end
+          on resource 'ui.rng' do
+            run DoFile, 'modifiers', (-3..-1), 'rng', 'text/xml' if get
+          end
+        end
       end
     end
     on resource 'endpoints' do
@@ -95,13 +110,13 @@ Riddl::Server.new(File.join(__dir__,'/resources.xml'), :host => 'localhost', :po
       on resource do
         run DoExists, 'endpoints' if get
         on resource 'symbol.svg' do
-          run DoSymbol, 'endpoints' if get
+          run DoFile, 'endpoints', (-2..-1), 'svg', 'image/svg+xml'  if get
         end
         on resource 'schema.rng' do
-          run DoSchema, 'endpoints' if get
+          run DoFile, 'endpoints', (-2..-1), 'rng', 'text/xml' if get
         end
         on resource 'properties.json' do
-          run DoProperties, 'endpoints' if get
+          run DoFile, 'endpoints', (-2..-1), 'json', 'application/json' if get
         end
       end
     end

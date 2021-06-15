@@ -26,29 +26,50 @@
       <parameter name="exists" mimetype="text/plain"/>
     </choice>
   </message>
+  <message name="testset">
+    <choice>
+      <parameter name="testset" mimetype="*/xml"/>
+      <parameter name="exists" mimetype="text/plain"/>
+    </choice>
+  </message>
   <message name="symbol">
-    <parameter name="svg" mimetype="image/svg+xml"/>
+    <choice>
+      <parameter name="svg" mimetype="image/svg+xml"/>
+      <parameter name="exists" mimetype="text/plain"/>
+    </choice>
   </message>
   <message name="schema">
-    <parameter name="rng" mimetype="*/xml"/>
+    <choice>
+      <parameter name="rng" mimetype="*/xml"/>
+      <parameter name="exists" mimetype="text/plain"/>
+    </choice>
   </message>
-  <message name="properties">
-    <parameter name="json" mimetype="application/json"/>
+  <message name="json">
+    <choice>
+      <parameter name="json" mimetype="application/json"/>
+      <parameter name="exists" mimetype="text/plain"/>
+    </choice>
   </message>
 
   <resource>
-    <resource relative='hardware'>
+    <resource relative='modifiers'>
       <get out="list"/>
       <resource>
-        <get out="exists"/>
-        <resource relative="ui.rng">
-          <get out="symbol"/>
-        </resource>
-        <resource relative="remove.xml">
-          <get out="schema"/>
-        </resource>
-        <resource relative="patch.xml">
-          <get out="properties"/>
+        <get out="list"/>
+        <resource>
+          <get out="exists"/>
+          <resource relative="patch.xml">
+            <get out="testset"/>
+          </resource>
+          <resource relative="unpatch.xml">
+            <get out="testset"/>
+          </resource>
+          <resource relative="condition.json">
+            <get out="json"/>
+          </resource>
+          <resource relative="ui.rng">
+            <get out="schema"/>
+          </resource>
         </resource>
       </resource>
     </resource>
@@ -63,7 +84,7 @@
           <get out="schema"/>
         </resource>
         <resource relative="properties.json">
-          <get out="properties"/>
+          <get out="json"/>
         </resource>
       </resource>
     </resource>
