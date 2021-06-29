@@ -71,7 +71,7 @@ class DoList < Riddl::Implementation #{{{
     dir = File.join(__dir__,'data',@a[0],*(@r[@a[1]].map{|e| Riddl::Protocols::Utils::escape(e)}))
     return Riddl::Parameter::Complex.new('list','text/xml') do
       doc = XML::Smart::string('<resources/>')
-      Dir.glob(File.join(dir,'*')).each do |f|
+      Dir.glob(File.join(dir,'*')).sort.each do |f|
        doc.root.add('resource',File.basename(f))
       end
       doc.to_s
