@@ -1,5 +1,5 @@
 <testset xmlns="http://cpee.org/ns/properties/2.0">
-  <subscriptions>
-    <subscription id='rex'/>
+  <subscriptions xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
+    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_rex" url="http://tango.wst.univie.ac.at:9332"/>
   </subscriptions>
 </testset>

@@ -1,5 +1,5 @@
-<element rngui:version="1.2" name="modifiers" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
-  <element name="s1" rngui:label="Resource Name">
+<element rngui:version="1.2" name="attributes" ns="http://cpee.org/ns/properties/2.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="resource_id" rngui:label="Resource Name">
     <data type="string" rngui:label="Unique Identifier"/>
   </element>
 </element>

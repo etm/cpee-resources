@@ -1,13 +1,17 @@
 <testset xmlns="http://cpee.org/ns/properties/2.0">
-  <subscriptions>
-    <subscription url="http://tango.wst.univie.ac.at:9332" id='rex'>
-      <votes topic="state">change</votes>
-      <events topic="state">change</events>
-      <events topic="task">instantiation</events>
+  <subscriptions xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
+    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_rex" url="http://tango.wst.univie.ac.at:9332">
+      <topic id="state">
+        <event>change</event>
+        <vote>change</vote>
+      </topic>
+      <topic id="task">
+        <event>instantiation</event>
+      </topic>
     </subscription>
   </subscriptions>
   <attributes>
     <resource_restriction>rex</resource_restriction>
-    <resource_id>%s1</resource_id>
+    <resource_id></resource_id>
   </attributes>
 </testset>
