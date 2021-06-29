@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <attributes>
+    <theme>extended</theme>
+  </attributes>
+</testset>
