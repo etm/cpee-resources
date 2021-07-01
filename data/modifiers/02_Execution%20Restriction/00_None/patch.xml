@@ -1,6 +1,6 @@
 <testset xmlns="http://cpee.org/ns/properties/2.0">
   <attributes>
-    <resource_restriction>none</resource_restriction>
-    <resource_id></resource_id>
+    <guarded>none</guarded>
+    <guarded_id></guarded_id>
   </attributes>
 </testset>

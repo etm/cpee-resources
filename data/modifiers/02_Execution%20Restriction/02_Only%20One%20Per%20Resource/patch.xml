@@ -11,7 +11,7 @@
     </subscription>
   </subscriptions>
   <attributes>
-    <resource_restriction>rex</resource_restriction>
-    <resource_id></resource_id>
+    <guarded>rex</guarded>
+    <guarded_id></guarded_id>
   </attributes>
 </testset>
