@@ -5,7 +5,7 @@
   <element name="message" rngui:label="Message">
     <text rngui:label="Message to send"/>
   </element>
-  <element name="ttl" rngui:label="Time to live" rngui:default="0" rngui:hint="0 for message to live forever.">
+  <element name="ttl" rngui:label="Time to live" rngui:default="0" rngui:hint="0 for message to live for 7 days (forever).">
     <data type="nonNegativeInteger" rngui:label="Time to live in seconds"/>
   </element>
 </element>
