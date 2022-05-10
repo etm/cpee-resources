@@ -1,0 +1,22 @@
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="orgmodel" rngui:label="Organisation Model">
+    <data type="string" rngui:label="Link to an XML Org-Model"/>
+  </element>
+  <element name="domain" rngui:label="Domain">
+    <data type="string" rngui:label="Container, e.g. VirtualBusiness1"/>
+  </element>
+  <element name="form" rngui:label="Form Link">
+    <data type="string" rngui:label="Link to an HTML Form"/>
+  </element>
+  <element name="role" rngui:label="Role">
+    <data type="string" rngui:label="e.g. Assistant"/>
+  </element>
+  <element name="data" rngui:header="Data Elements">
+    <zeroOrMore rngui:label="New Data Element">
+      <element rngui:label='Name'>
+        <anyName/>
+        <data type="string" rngui:label="Value"/>
+      </element>
+    </zeroOrMore>
+  </element>
+</element>

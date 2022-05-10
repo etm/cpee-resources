@@ -2,7 +2,13 @@
   <element name="id" rngui:label="Identification">
     <data type="string" rngui:label="Unique ID of the message exchange slot"/>
   </element>
-  <element name="ttl" rngui:label="Time to live" rngui:default="0" rngui:hint="0 for message to live forever.">
-    <data type="nonNegativeInteger" rngui:label="Time to live in seconds"/>
+  <element name="ttl" rngui:label="Time to live" rngui:default="0" rngui:hint="0 for message to wait forever.">
+    <data type="nonNegativeInteger" rngui:label="Time to max wait in seconds"/>
+  </element>
+  <element name="delete" rngui:label="Delete" rngui:default="true" rngui:hint="Delete message after receive.">
+    <choice>
+      <value>true</value>
+      <value>false</value>
+    </choice>
   </element>
 </element>
