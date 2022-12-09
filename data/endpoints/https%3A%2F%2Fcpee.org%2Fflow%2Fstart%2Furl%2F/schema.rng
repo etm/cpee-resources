@@ -26,6 +26,14 @@
       </element>
     </zeroOrMore>
   </element>
+  <element name="attributes" rngui:header="Overwrite Attributes">
+    <zeroOrMore rngui:label="New Attribute">
+      <element rngui:label='Name'>
+        <anyName/>
+        <data type="string" rngui:label="Value"/>
+      </element>
+    </zeroOrMore>
+  </element>
   <element name="customization" rngui:header="Task Customization">
     <zeroOrMore rngui:label="For Task">
       <element name="task">
