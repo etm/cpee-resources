@@ -22,12 +22,12 @@ require 'riddl/server'
 class DoExists < Riddl::Implementation #{{{
   def response
     dir = File.join(__dir__,'data',@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
-    if Dir.exists?(dir)
+    if Dir.exist?(dir)
       return Riddl::Parameter::Complex.new('exists','text/xml') do
         doc = XML::Smart::string('<resource/>')
-        doc.root.add('schema','schema.rng') if File.exists?(File.join(dir,'schema.rng'))
-        doc.root.add('symbol','symbol.svg') if File.exists?(File.join(dir,'symbol.svg'))
-        doc.root.add('properties','properties.json') if File.exists?(File.join(dir,'properties.json'))
+        doc.root.add('schema','schema.rng') if File.exist?(File.join(dir,'schema.rng'))
+        doc.root.add('symbol','symbol.svg') if File.exist?(File.join(dir,'symbol.svg'))
+        doc.root.add('properties','properties.json') if File.exist?(File.join(dir,'properties.json'))
         doc.to_s
       end
     else
@@ -39,13 +39,13 @@ end #}}}
 class DoModExists < Riddl::Implementation #{{{
   def response
     dir = File.join(__dir__,'data','modifiers',Riddl::Protocols::Utils::escape(@r[-2]),Riddl::Protocols::Utils::escape(@r[-1]))
-    if Dir.exists?(dir)
+    if Dir.exist?(dir)
       Riddl::Parameter::Complex.new('exists','text/xml') do
         doc = XML::Smart::string('<resource/>')
-        doc.root.add('patch','patch.xml') if File.exists?(File.join(dir,'patch.xml'))
-        doc.root.add('unpatch','unpatch.xml') if File.exists?(File.join(dir,'unpatch.xml'))
-        doc.root.add('condition','condition.json') if File.exists?(File.join(dir,'condition.json'))
-        doc.root.add('ui','ui.rng') if File.exists?(File.join(dir,'ui.rng'))
+        doc.root.add('patch','patch.xml') if File.exist?(File.join(dir,'patch.xml'))
+        doc.root.add('unpatch','unpatch.xml') if File.exist?(File.join(dir,'unpatch.xml'))
+        doc.root.add('condition','condition.json') if File.exist?(File.join(dir,'condition.json'))
+        doc.root.add('ui','ui.rng') if File.exist?(File.join(dir,'ui.rng'))
         doc.to_s
       end
     else
@@ -57,8 +57,8 @@ end #}}}
 class DoFile < Riddl::Implementation #{{{
   def response
     file = File.join(__dir__,'data',@a[0],*(@r[@a[1]].map{|e| Riddl::Protocols::Utils::escape(e)}))
-    if File.exists?(file)
-      Riddl::Parameter::Complex.new(@a[2],@a[3],File.read(file)) if File.exists?(file)
+    if File.exist?(file)
+      Riddl::Parameter::Complex.new(@a[2],@a[3],File.read(file)) if File.exist?(file)
     else
       @status = 404
       Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
