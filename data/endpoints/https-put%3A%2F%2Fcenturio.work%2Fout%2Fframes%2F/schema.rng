@@ -1,8 +1,8 @@
 <element rngui:version="1.2" name="arguments" rngui:header="Arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
   <element name="type" rngui:label='Type' rngui:default='set'>
     <choice>
-      <value id="set">Set UI and continue</value>
-      <value id="wait">Set UI and wait for input</value>
+      <value rngui:label="Set UI and continue">set</value>
+      <value rngui:label="Set UI and wait for input">wait</value>
     </choice>
   </element>
   <element name="lx" rngui:label="Displacement left">

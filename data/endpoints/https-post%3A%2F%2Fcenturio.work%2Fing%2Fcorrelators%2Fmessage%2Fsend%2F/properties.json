@@ -1,5 +1,5 @@
 {
   "type": "event",
-  "resource": "receive",
+  "resource": "send",
   "locking": "shared"
 }

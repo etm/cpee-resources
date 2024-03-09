@@ -8,6 +8,6 @@
     </choice>
   </element>
   <element name="url" rngui:label="Process">
-    <choice href="../design/server/?full" extract="_.map(data,function(n){ return [n['name'],'../design/server/' + n['name']]; });"/>
+    <choice rngui:href="../hub/server/?full" rngui:extract="_.map(data,function(n){ return [n['name'],'../hub/server/' + n['name']]; });"/>
   </element>
 </element>

@@ -8,7 +8,7 @@
     </choice>
   </element>
   <element name="url" rngui:label="Process">
-    <data type="string" rngui:label="Link to centurio.work testset"/>
+    <data type="string" rngui:label="Link to cpee.org testset"/>
   </element>
   <element name="init" rngui:header="Initialize Data Elements">
     <zeroOrMore rngui:label="New Data Element">
@@ -42,10 +42,10 @@
         </element>
         <element name="id" rngui:label="Replace What?">
           <choice>
-            <value id="parameters/stream/sensors">Properties &gt; Data Stream Handling &gt; Sensors</value>
-            <value id="parameters/stream/ips">Properties &gt; Data Stream Handling &gt; Impact Profiles</value>
-            <value id="parameters/report">Properties &gt; Reports</value>
-            <value id="annotations/_timing">Annotations &gt; Timing</value>
+            <value rngui:label="Properties &gt; Data Stream Handling &gt; Sensors">parameters/stream/sensors</value>
+            <value rngui:labid="Properties &gt; Data Stream Handling &gt; Impact Profiles">parameters/stream/ips</value>
+            <value rngui:labid="Properties &gt; Reports">parameters/report</value>
+            <value rngui:labid="Annotations &gt; Timing">annotations/_timing</value>
           </choice>
         </element>
         <element name="url" rngui:label="Url">
