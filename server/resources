@@ -1,0 +1,35 @@
+#!/usr/bin/ruby
+#
+# This file is part of CPEE-RESOURCES.
+#
+# CPEE-RESOURCES is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+#
+# CPEE-RESOURCES is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with CPEE-RESOURCES (file LICENSE in the main directory).  If not, see
+# <http://www.gnu.org/licenses/>.
+
+require 'rubygems'
+require 'cpee-resources/implementation'
+
+options = {
+  :host => 'localhost',
+  :port => 9303,
+  :secure => false
+}
+
+Riddl::Server.new(CPEE::Resources::SERVER, options) do
+  accessible_description true
+  cross_site_xhr true
+
+  @riddl_opts[:data_dir] ||= File.join(__dir__,'data')
+
+  use CPEE::Resources::implementation(@riddl_opts)
+end.loop!
