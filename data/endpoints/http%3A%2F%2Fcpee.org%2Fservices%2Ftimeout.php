@@ -1,1 +1,0 @@
-http%3A%2F%2Fgruppe.wst.univie.ac.at%2F%7Emangler%2Fservices%2Ftimeout.php
