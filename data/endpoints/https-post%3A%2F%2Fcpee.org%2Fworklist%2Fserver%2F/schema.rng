@@ -11,6 +11,23 @@
   <element name="priority" rngui:label="Priority" rngui:default="1">
     <data type="positiveInteger" rngui:label="a number between zero and n"/>
   </element>
+  <element name="handling" rngui:label="Handling" rngui:onchange="self.relaxngui_toggle('> call > parameters > arguments > collect','> call > parameters > arguments > deadline')" rngui:oninit="self.relaxngui_visible('collect','> call > parameters > arguments > collect','> call > parameters > arguments > deadline')">
+    <attribute name="rngui-nonfunctional"/>
+    <choice>
+      <value rngui:label="By Single Worker">single</value>
+      <value rngui:label="By Multiple Workers">collect</value>
+    </choice>
+  </element>
+  <optional>
+    <element name="collect" rngui:label="Minimum Required Workers" rngui:visible="false" rngui:default="0">
+      <data type="nonNegativeInteger" rngui:label="a number between 1 and n, zero means all workers in the role"/>
+    </element>
+  </optional>
+  <optional>
+    <element name="deadline" rngui:label="Deadline" rngui:visible="false">
+      <data type="string" rngui:label="deadline, e.g. 3 days"/>
+    </element>
+  </optional>
   <element name="restrictions" rngui:header="Subject Restrictions">
     <zeroOrMore rngui:label="New Restriction">
       <element name="restriction">
