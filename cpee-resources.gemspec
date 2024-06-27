@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name             = "cpee-resources"
   s.version          = "1.0.0"
   s.platform         = Gem::Platform::RUBY
-  s.license          = "LGPL-3.0"
+  s.license          = "LGPL-3.0-or-later"
   s.summary          = "Resources list for the cloud process execution engine (cpee.org)"
 
   s.description      = "see http://cpee.org"
