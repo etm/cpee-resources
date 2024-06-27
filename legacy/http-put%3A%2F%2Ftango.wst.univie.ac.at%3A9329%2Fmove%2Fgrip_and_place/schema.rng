@@ -1,0 +1,14 @@
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="x" rngui:label="Pick from X">
+    <data type="string" rngui:label="mm"/>
+  </element>
+  <element name="y" rngui:label="Pick from Y">
+    <data type="string" rngui:label="mm"/>
+  </element>
+  <element name="place_x" rngui:label="Place in row X">
+    <data type="string" rngui:label="position"/>
+  </element>
+  <element name="place_y" rngui:label="Place in column Y">
+    <data type="string" rngui:label="position"/>
+  </element>
+</element>

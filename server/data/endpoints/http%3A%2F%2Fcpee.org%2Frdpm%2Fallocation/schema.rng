@@ -1,0 +1,20 @@
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="resource_url" rngui:label="resource_url">
+    <data type="string" rngui:label="url to resource config"/>
+  </element>
+  <element name="resource_file" rngui:label="resource_file">
+    <data type="string" rngui:label="resource file name"/>
+  </element>
+  <element name="measure" rngui:label="Measure">
+    <choice>
+    <value>cost</value>
+    <value>time</value>
+    </choice>
+  </element>
+  <element name="operator" rngui:label="Operator">
+    <choice>
+    <value>min</value>
+    <value>max</value>
+    </choice>
+  </element>
+</element>

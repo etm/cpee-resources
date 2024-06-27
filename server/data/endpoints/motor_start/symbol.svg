@@ -1,0 +1,10 @@
+<g xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="28" height="28" rx="4" class="hfill rfill cline stand"/>
+  <g transform="translate(7 7) scale(0.8 0.8)">
+     <path
+       d="M 4,20 18,10 4,1 Z"
+       class="standfat"
+     />
+  </g>
+</g>
+

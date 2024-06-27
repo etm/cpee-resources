@@ -1,0 +1,14 @@
+<g xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="28" height="28" rx="4" class="hfill rfill cline stand"/>
+  <g transform="translate(3 3) scale(1.15 1.15)">
+    <path
+       d="M 10.449244,1.5000598 A 9.0152948,9.0152948 0 0 0 1.5,10.515049 h 18.030015 a 9.0152948,9.0152948 0 0 0 -9.015008,-9.0149892 9.0152948,9.0152948 0 0 0 -0.06567,0 z"
+       class="standfat"
+       id="path43" />
+    <path
+       d="M 10.515007,10.515049 7.508846,6.3064088"
+       class="black stand"
+       id="path44" />
+  </g>
+</g>
+

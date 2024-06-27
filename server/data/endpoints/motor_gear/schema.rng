@@ -1,0 +1,8 @@
+<element rngui:version="1.2" rngui:header="Arguments" name="arguments" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:rngui="http://rngui.org">
+  <element name="level" rngui:label="RPM" rngui:default="500">
+    <data type="nonNegativeInteger" rngui:label="0..4000"/>
+  </element>
+  <element name="duration" rngui:label="Duration" rngui:default="120">
+    <data type="nonNegativeInteger" rngui:label="Seconds"/>
+  </element>
+</element>
