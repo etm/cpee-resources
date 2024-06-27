@@ -22,7 +22,7 @@ require 'riddl/server'
 module CPEE
   module Resources
 
-    SERVER = File.expand_path(File.join(__dir__,'resources.xml'))
+    SERVER = File.expand_path(File.join(__dir__,'implementation.xml'))
 
     class DoExists < Riddl::Implementation #{{{
       def response
@@ -94,38 +94,38 @@ module CPEE
       Proc.new do
         on resource do
           on resource 'modifiers' do
-            run DoList, 'modifiers', opts[:data-dir] if get
+            run DoList, 'modifiers', opts[:data_dir] if get
             on resource do
-              run DoList, 'modifiers', opts[:data-dir], (-1..-1) if get
+              run DoList, 'modifiers', opts[:data_dir], (-1..-1) if get
               on resource do
-                run DoModExists, 'modifiers', opts[:data-dir] if get
+                run DoModExists, 'modifiers', opts[:data_dir] if get
                 on resource 'patch.xml' do
-                  run DoFile, 'modifiers', opts[:data-dir], (-3..-1), 'testset', 'text/xml' if get
+                  run DoFile, 'modifiers', opts[:data_dir], (-3..-1), 'testset', 'text/xml' if get
                 end
                 on resource 'unpatch.xml' do
-                  run DoFile, 'modifiers', opts[:data-dir], (-3..-1), 'testset', 'text/xml' if get
+                  run DoFile, 'modifiers', opts[:data_dir], (-3..-1), 'testset', 'text/xml' if get
                 end
                 on resource 'condition.json' do
-                  run DoFile, 'modifiers', opts[:data-dir], (-3..-1), 'json', 'application/json' if get
+                  run DoFile, 'modifiers', opts[:data_dir], (-3..-1), 'json', 'application/json' if get
                 end
                 on resource 'ui.rng' do
-                  run DoFile, 'modifiers', opts[:data-dir], (-3..-1), 'rng', 'text/xml' if get
+                  run DoFile, 'modifiers', opts[:data_dir], (-3..-1), 'rng', 'text/xml' if get
                 end
               end
             end
           end
           on resource 'endpoints' do
-            run DoList, 'endpoints', opts[:data-dir] if get
+            run DoList, 'endpoints', opts[:data_dir] if get
             on resource do
-              run DoExists, 'endpoints', opts[:data-dir] if get
+              run DoExists, 'endpoints', opts[:data_dir] if get
               on resource 'symbol.svg' do
-                run DoFile, 'endpoints', opts[:data-dir], (-2..-1), 'svg', 'image/svg+xml'  if get
+                run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
               end
               on resource 'schema.rng' do
-                run DoFile, 'endpoints', opts[:data-dir], (-2..-1), 'rng', 'text/xml' if get
+                run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if get
               end
               on resource 'properties.json' do
-                run DoFile, 'endpoints', opts[:data-dir], (-2..-1), 'json', 'application/json' if get
+                run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
               end
             end
           end
