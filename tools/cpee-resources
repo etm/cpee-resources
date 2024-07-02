@@ -43,11 +43,11 @@ end
 ARGV.options { |opt|
   opt.summary_indent = ' ' * 2
   opt.summary_width = 15
-  opt.banner = "Usage:\n#{opt.summary_indent}#{File.basename($0)} [DIR]\n"
+  opt.banner = "Usage:\n#{opt.summary_indent}#{File.basename($0)} [options] new DIR\n"
   opt.on("Options:")
   opt.on("--help", "-h", "This text") { puts opt; exit }
 	opt.on("")
-  opt.on(wrap("[DIR]             scaffolds a sample resources service."))
+  opt.on(wrap("[new DIR]         scaffolds a sample resources service."))
   opt.parse!
 }
 if (ARGV.length <  2) ||
