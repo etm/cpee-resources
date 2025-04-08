@@ -66,7 +66,7 @@ module CPEE
         data = @a[1]
         file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
         if File.exist?(file)
-          Riddl::Parameter::Complex.new(@a[3],@a[4],File.read(file)) if File.exist?(file)
+          Riddl::Parameter::Complex.new(@a[3],@a[4],File.read(file))
         else
           @status = 404
           Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
@@ -85,6 +85,14 @@ module CPEE
           end
           doc.to_s
         end
+      end
+    end #}}}
+
+    class DoFile < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
+        File.write(file,@p[0])
       end
     end #}}}
 
@@ -123,6 +131,7 @@ module CPEE
               end
               on resource 'schema.rng' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if get
+                run SaveFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if put 'schema'
               end
               on resource 'properties.json' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
