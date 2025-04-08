@@ -8,3 +8,9 @@ OS Dependencies:
 Ruby dependencies:
 
 * gem install riddl
+
+Scaffold local install:
+
+
+* cd ~/run
+* cpee-resource new resources
