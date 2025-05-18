@@ -88,14 +88,6 @@ module CPEE
       end
     end #}}}
 
-    class DoFile < Riddl::Implementation #{{{
-      def response
-        data = @a[1]
-        file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
-        File.write(file,@p[0])
-      end
-    end #}}}
-
     def self::implementation(opts)
       opts[:data_dir]           ||= File.expand_path(File.join(__dir__,'data'))
 
@@ -131,7 +123,6 @@ module CPEE
               end
               on resource 'schema.rng' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if get
-                run SaveFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if put 'schema'
               end
               on resource 'properties.json' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
