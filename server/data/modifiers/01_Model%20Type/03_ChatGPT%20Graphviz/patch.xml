@@ -4,7 +4,7 @@
     <modeltype>ChatGPT_Graphviz</modeltype>
   </attributes>
   <transformation>
-    <description type='rest'>http://localhost:9295/graphviz/</description>
+    <description type='rest'>http://localhost:9295/cpee/graphviz/</description>
     <dataelements type='none'/>
     <endpoints type='none'/>
   </transformation>

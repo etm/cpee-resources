@@ -4,7 +4,7 @@
     <modeltype>ChatGPT_Mermaid</modeltype>
   </attributes>
   <transformation>
-    <description type='rest'>http://localhost:9295/mermaid/</description>
+    <description type='rest'>http://localhost:9295/cpee/mermaid/</description>
     <dataelements type='none'/>
     <endpoints type='none'/>
   </transformation>
