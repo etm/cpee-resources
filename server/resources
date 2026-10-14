@@ -16,8 +16,13 @@
 # along with CPEE-RESOURCES (file LICENSE in the main directory).  If not, see
 # <http://www.gnu.org/licenses/>.
 
-require 'rubygems'
-require 'cpee-resources/implementation'
+if File.exist?(File.join(__dir__,'..','lib','cpee-resources','implementation.rb'))
+  require_relative File.join(__dir__,'..','lib','cpee-resources','implementation')
+elsif File.exist?(File.join(Dir.home,'Projects','cpee-resources','lib','cpee-resources','implementation.rb'))
+  require_relative File.join(Dir.home, 'Projects','cpee-resources','lib','cpee-resources','implementation')
+else
+  require 'cpee-resources/implementation'
+end
 
 options = {
   :host => 'localhost',

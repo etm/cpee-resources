@@ -16,7 +16,7 @@
 # along with CPEE-RESOURCES (file LICENSE in the main directory). If not, see
 # <http://www.gnu.org/licenses/>.
 
-require 'rubygems'
+require 'json'
 require 'riddl/server'
 
 module CPEE
@@ -82,7 +82,24 @@ module CPEE
         return Riddl::Parameter::Complex.new('list','text/xml') do
           doc = XML::Smart::string('<resources/>')
           Dir.glob(File.join(dir,'*')).sort.each do |f|
-           doc.root.add('resource',File.basename(f))
+            doc.root.add('resource',File.basename(f))
+          end
+          doc.to_s
+        end
+      end
+    end #}}}
+    class DoDescList < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        @a[2] ||= 0...0
+        dir = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
+        return Riddl::Parameter::Complex.new('list','text/xml') do
+          doc = XML::Smart::string('<resources/>')
+          Dir.glob(File.join(dir,'*','descriptions')).each do |f|
+            n = doc.root.add('resource', 'endpoint' => File.basename(File.dirname(f)))
+            n.add('endpoint', File.read(File.join(f,'endpoint.md'))) if File.exist?(File.join(f,'endpoint.md'))
+            n.add('functionality', File.read(File.join(f,'functionality.md'))) if File.exist?(File.join(f,'functionality.md'))
+            n.add('output', File.read(File.join(f,'output.md'))) if File.exist?(File.join(f,'output.md'))
           end
           doc.to_s
         end
@@ -119,6 +136,7 @@ module CPEE
             run DoList, 'endpoints', opts[:data_dir] if get
           end
           on resource 'endpoints' do
+            run DoDescList, 'endpoints', opts[:data_dir] if get 'dfilter'
             run DoList, 'endpoints', opts[:data_dir] if get
             on resource do
               run DoExists, 'endpoints', opts[:data_dir] if get
