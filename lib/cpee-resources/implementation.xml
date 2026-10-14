@@ -17,6 +17,9 @@
 -->
 
 <description xmlns="http://riddl.org/ns/description/1.0" xmlns:ann="http://riddl.org/ns/annotation/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <message name="dfilter">
+    <parameter name="description" type="string"/>
+  </message>
   <message name="list">
     <parameter name="list" mimetype="*/xml"/>
   </message>
@@ -74,7 +77,8 @@
       </resource>
     </resource> <!--}}}-->
     <resource relative='endpoints'>
-      <get out="list"/>
+      <get in="dfilter" out="list"/>
+      <get in="*" out="list"/>
       <resource>
         <get out="exists"/>
         <resource relative="symbol.svg">
