@@ -34,6 +34,7 @@ module CPEE
             doc.root.add('schema','schema.rng') if File.exist?(File.join(dir,'schema.rng'))
             doc.root.add('symbol','symbol.svg') if File.exist?(File.join(dir,'symbol.svg'))
             doc.root.add('properties','properties.json') if File.exist?(File.join(dir,'properties.json'))
+            doc.root.add('descriptions') if Dir.exist?(File.join(dir,'descriptions'))
             doc.to_s
           end
         else
@@ -114,6 +115,9 @@ module CPEE
               end
             end
           end
+          on resource 'symbols' do
+            run DoList, 'endpoints', opts[:data_dir] if get
+          end
           on resource 'endpoints' do
             run DoList, 'endpoints', opts[:data_dir] if get
             on resource do
@@ -126,6 +130,17 @@ module CPEE
               end
               on resource 'properties.json' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
+              end
+              on resource 'descriptions' do
+                on resource 'functionality.md' do
+                  run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
+                end
+                on resource 'output.md' do
+                  run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
+                end
+                on resource 'endpoint.md' do
+                  run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
+                end
               end
             end
           end

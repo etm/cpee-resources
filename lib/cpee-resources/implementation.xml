@@ -50,6 +50,12 @@
       <parameter name="exists" mimetype="text/plain"/>
     </choice>
   </message>
+  <message name="markdown">
+    <choice>
+      <parameter name="markdown" mimetype="text/markdown"/>
+      <parameter name="exists" mimetype="text/plain"/>
+    </choice>
+  </message>
 
   <resource>
     <resource relative='modifiers'> <!--{{{-->
@@ -73,6 +79,10 @@
         </resource>
       </resource>
     </resource> <!--}}}-->
+    <resource relative='symbols'>
+    </resource>
+    <resource relative='schemas'>
+    </resource>
     <resource relative='endpoints'>
       <get out="list"/>
       <resource>
@@ -86,6 +96,17 @@
         </resource>
         <resource relative="properties.json">
           <get out="json"/>
+        </resource>
+        <resource relative="descriptions">
+          <resource relative="functionality.md">
+            <get out="markdown"/>
+          </resource>
+          <resource relative="output.md">
+            <get out="markdown"/>
+          </resource>
+          <resource relative="endpoint.md">
+            <get out="markdown"/>
+          </resource>
         </resource>
       </resource>
     </resource>
