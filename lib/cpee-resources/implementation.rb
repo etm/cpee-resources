@@ -48,6 +48,22 @@ module CPEE
         nil
       end
     end #}}}
+    class DoPutDescription < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-3]))
+        unless Dir.exist?(dir)
+          @status = 404
+          return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+        ddir = File.join(dir,'descriptions')
+        Dir.mkdir(ddir) unless Dir.exist?(ddir)
+        File.open(File.join(ddir,@r[-1]),'wb') do |f|
+          IO.copy_stream(@p[0].value,f)
+        end
+        nil
+      end
+    end #}}}
     class DoPutEndpointFile < Riddl::Implementation #{{{
       def response
         data = @a[1]
@@ -77,9 +93,75 @@ module CPEE
     class DoDeleteFile < Riddl::Implementation #{{{
       def response
         data = @a[1]
-        file = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
-        if File.exist?(file)
+        file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
+        if File.exist?(file) || File.symlink?(file)
           File.delete(file)
+          nil
+        else
+          @status = 404
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+      end
+    end #}}}
+    class DoProperties < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-2]))
+        file = File.join(dir,'properties.json')
+        if Dir.exist?(dir)
+          props = File.exist?(file) ? JSON.parse(File.read(file)) : {}
+          props['global-schema'] = File.symlink?(File.join(dir,'schema.rng'))
+          props['global-symbol'] = File.symlink?(File.join(dir,'symbol.svg'))
+          Riddl::Parameter::Complex.new('json','application/json',JSON.generate(props))
+        else
+          @status = 404
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+      end
+    end #}}}
+    class DoGetProperty < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-3]))
+        file = File.join(dir,'properties.json')
+        key = @r[-1]
+        props = File.exist?(file) ? JSON.parse(File.read(file)) : {}
+        props['global-schema'] = File.symlink?(File.join(dir,'schema.rng'))
+        props['global-symbol'] = File.symlink?(File.join(dir,'symbol.svg'))
+        if Dir.exist?(dir) && props.key?(key)
+          Riddl::Parameter::Complex.new('value','text/plain',props[key].to_s)
+        else
+          @status = 404
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+      end
+    end #}}}
+    class DoPutProperty < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-3]))
+        file = File.join(dir,'properties.json')
+        key = @r[-1]
+        unless Dir.exist?(dir)
+          @status = 404
+          return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+        props = File.exist?(file) && !File.read(file).strip.empty? ? JSON.parse(File.read(file)) : {}
+        props[key] = @p[0].value
+        File.write(file,JSON.pretty_generate(props))
+        nil
+      end
+    end #}}}
+    class DoDeleteProperty < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-3]))
+        file = File.join(dir,'properties.json')
+        key = @r[-1]
+        props = File.exist?(file) ? JSON.parse(File.read(file)) : {}
+        if props.key?(key)
+          props.delete(key)
+          File.write(file,JSON.pretty_generate(props))
           nil
         else
           @status = 404
@@ -92,6 +174,7 @@ module CPEE
         data = @a[1]
         dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@p[0].value))
         Dir.mkdir(dir)
+        File.write(File.join(dir,'properties.json'),'{}')
         @status = 201
         nil
       rescue Errno::EEXIST
@@ -110,9 +193,10 @@ module CPEE
         end
         return Riddl::Parameter::Complex.new('list','text/xml') do
           doc = XML::Smart::string('<resources/>')
-          Dir.glob(File.join(dir,'*')).sort.each do |f|
-            next if @a[4] && !@a[4].include?(File.basename(f))
-            doc.root.add('resource',File.basename(f))
+          names = Dir.glob(File.join(dir,'*')).map{ |f| File.basename(f) } | (@a[5] || [])
+          names.sort.each do |n|
+            next if @a[4] && !@a[4].include?(n)
+            doc.root.add('resource',n)
           end
           doc.to_s
         end
@@ -168,7 +252,7 @@ module CPEE
             on resource '[a-z][a-zA-Z0-9_-]*\.svg' do
               run DoFile, 'symbols', opts[:data_dir], (-1..-1), 'svg', 'image/svg+xml' if get
               run DoPutFile, 'symbols', opts[:data_dir] if put 'symbol'
-              run DoDeleteFile, 'symbols', opts[:data_dir] if delete
+              run DoDeleteFile, 'symbols', opts[:data_dir], (-1..-1) if delete
             end
           end
           on resource 'schemas' do
@@ -176,7 +260,7 @@ module CPEE
             on resource '[a-z][a-zA-Z0-9_-]*\.rng' do
               run DoFile, 'schemas', opts[:data_dir], (-1..-1), 'rng', 'text/xml' if get
               run DoPutFile, 'schemas', opts[:data_dir] if put 'schema'
-              run DoDeleteFile, 'schemas', opts[:data_dir] if delete
+              run DoDeleteFile, 'schemas', opts[:data_dir], (-1..-1) if delete
             end
           end
           on resource 'endpoints' do
@@ -184,28 +268,41 @@ module CPEE
             run DoList, 'endpoints', opts[:data_dir] if get
             run DoNewEndpoint, 'endpoints', opts[:data_dir] if post 'endpoint'
             on resource do
-              run DoList, 'endpoints', opts[:data_dir], (-1..-1), true, %w{schema.rng symbol.svg properties.json descriptions} if get
+              run DoList, 'endpoints', opts[:data_dir], (-1..-1), true, %w{schema.rng symbol.svg properties.json descriptions}, %w{properties.json} if get
               on resource 'symbol.svg' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
                 run DoPutEndpointFile, 'endpoints', opts[:data_dir], 'symbols' if put 'endpoint-symbol'
+                run DoDeleteFile, 'endpoints', opts[:data_dir], (-2..-1) if delete
               end
               on resource 'schema.rng' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if get
                 run DoPutEndpointFile, 'endpoints', opts[:data_dir], 'schemas' if put 'endpoint-schema'
+                run DoDeleteFile, 'endpoints', opts[:data_dir], (-2..-1) if delete
               end
               on resource 'properties.json' do
-                run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
+                run DoProperties, 'endpoints', opts[:data_dir] if get
+                on resource do
+                  run DoGetProperty, 'endpoints', opts[:data_dir] if get
+                  run DoPutProperty, 'endpoints', opts[:data_dir] if put 'property'
+                  run DoDeleteProperty, 'endpoints', opts[:data_dir] if delete
+                end
               end
               on resource 'descriptions' do
                 run DoList, 'endpoints', opts[:data_dir], (-2..-1), true, %w{functionality.md output.md endpoint.md} if get
                 on resource 'functionality.md' do
                   run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
+                  run DoPutDescription, 'endpoints', opts[:data_dir] if put 'description-file'
+                  run DoDeleteFile, 'endpoints', opts[:data_dir], (-3..-1) if delete
                 end
                 on resource 'output.md' do
                   run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
+                  run DoPutDescription, 'endpoints', opts[:data_dir] if put 'description-file'
+                  run DoDeleteFile, 'endpoints', opts[:data_dir], (-3..-1) if delete
                 end
                 on resource 'endpoint.md' do
                   run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
+                  run DoPutDescription, 'endpoints', opts[:data_dir] if put 'description-file'
+                  run DoDeleteFile, 'endpoints', opts[:data_dir], (-3..-1) if delete
                 end
               end
             end

@@ -60,11 +60,20 @@
       <parameter name="exists" mimetype="text/plain"/>
     </choice>
   </message>
+  <message name="property">
+    <parameter name="value" type="string"/>
+  </message>
+  <message name="property-value">
+    <parameter name="value" mimetype="text/plain"/>
+  </message>
   <message name="markdown">
     <choice>
       <parameter name="markdown" mimetype="text/markdown"/>
       <parameter name="exists" mimetype="text/plain"/>
     </choice>
+  </message>
+  <message name="description-file">
+    <parameter name="*" mimetype="text/markdown"/>
   </message>
 
   <resource>
@@ -95,7 +104,7 @@
       <resource relative="[a-z][a-zA-Z0-9_-]*\.svg">
         <get out="symbol"/>
         <put in="symbol"/>
-        <delete in="*"/>
+        <delete/>
       </resource>
     </resource>
     <resource relative='schemas'>
@@ -103,7 +112,7 @@
       <resource relative="[a-z][a-zA-Z0-9_-]*\.rng">
         <get out="schema"/>
         <put in="schema"/>
-        <delete in="*"/>
+        <delete/>
       </resource>
     </resource>
     <resource relative='endpoints'>
@@ -115,24 +124,37 @@
         <resource relative="symbol.svg">
           <get out="symbol"/>
           <put in="endpoint-symbol"/>
+          <delete/>
         </resource>
         <resource relative="schema.rng">
           <get out="schema"/>
           <put in="endpoint-schema"/>
+          <delete/>
         </resource>
         <resource relative="properties.json">
           <get out="json"/>
+          <resource>
+            <get out="property-value"/>
+            <put in="property"/>
+            <delete/>
+          </resource>
         </resource>
         <resource relative="descriptions">
           <get out="list"/>
           <resource relative="functionality.md">
             <get out="markdown"/>
+            <put in="description-file"/>
+            <delete/>
           </resource>
           <resource relative="output.md">
             <get out="markdown"/>
+            <put in="description-file"/>
+            <delete/>
           </resource>
           <resource relative="endpoint.md">
             <get out="markdown"/>
+            <put in="description-file"/>
+            <delete/>
           </resource>
         </resource>
       </resource>
