@@ -66,7 +66,7 @@ module CPEE
       def response
         data = @a[1]
         file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
-        if File.exist?(file)
+        if File.exist?(file) && (@r[@a[2]] & ['.','..']).empty?
           Riddl::Parameter::Complex.new(@a[3],@a[4],File.read(file))
         else
           @status = 404
@@ -133,7 +133,16 @@ module CPEE
             end
           end
           on resource 'symbols' do
-            run DoList, 'endpoints', opts[:data_dir] if get
+            run DoList, 'symbols', opts[:data_dir] if get
+            on resource do
+              run DoFile, 'symbols', opts[:data_dir], (-1..-1), 'svg', 'image/svg+xml' if get
+            end
+          end
+          on resource 'schemas' do
+            run DoList, 'schemas', opts[:data_dir] if get
+            on resource do
+              run DoFile, 'schemas', opts[:data_dir], (-1..-1), 'rng', 'text/xml' if get
+            end
           end
           on resource 'endpoints' do
             run DoDescList, 'endpoints', opts[:data_dir] if get 'dfilter'

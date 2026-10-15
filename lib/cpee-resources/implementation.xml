@@ -83,8 +83,16 @@
       </resource>
     </resource> <!--}}}-->
     <resource relative='symbols'>
+      <get out="list"/>
+      <resource>
+        <get out="symbol"/>
+      </resource>
     </resource>
     <resource relative='schemas'>
+      <get out="list"/>
+      <resource>
+        <get out="schema"/>
+      </resource>
     </resource>
     <resource relative='endpoints'>
       <get in="dfilter" out="list"/>
