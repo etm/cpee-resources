@@ -73,16 +73,18 @@
     </resource> <!--}}}-->
     <resource relative='symbols'>
       <get out="list"/>
-      <resource>
+      <resource relative="[a-z][a-zA-Z0-9_-]*\.svg">
         <get out="symbol"/>
         <put in="symbol"/>
+        <delete in="*"/>
       </resource>
     </resource>
     <resource relative='schemas'>
       <get out="list"/>
-      <resource>
+      <resource relative="[a-z][a-zA-Z0-9_-]*\.rng">
         <get out="schema"/>
         <put in="schema"/>
+        <delete in="*"/>
       </resource>
     </resource>
     <resource relative='endpoints'>

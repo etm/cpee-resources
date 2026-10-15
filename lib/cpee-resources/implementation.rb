@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 
 require 'json'
-require 'fileutils'
 require 'riddl/server'
 
 module CPEE
@@ -42,22 +41,24 @@ module CPEE
       def response
         data = @a[1]
         name = @r[-1]
-        content = @p[0].value
-        content = content.read if content.respond_to?(:read)
-        begin
-          XML::Smart::string(content)
-        rescue => e
-          @status = 400
-          return Riddl::Parameter::Complex.new('error','text/plain',"Not well-formed XML: #{e.message}")
+        file = File.join(data,@a[0],Riddl::Protocols::Utils::escape(name))
+        File.open(file,'wb') do |f|
+          IO.copy_stream(@p[0].value,f)
         end
-        dir = File.join(data,@a[0])
-        file = File.join(dir,Riddl::Protocols::Utils::escape(name))
-        tmp = File.join(dir,'.' + Riddl::Protocols::Utils::escape(name) + '.tmp')
-        @status = File.exist?(file) ? 200 : 201
-        FileUtils.mkdir_p(dir)
-        File.write(tmp,content)
-        File.rename(tmp,file)
         nil
+      end
+    end #}}}
+    class DoDeleteFile < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        file = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
+        if File.exist?(file)
+          File.delete(file)
+          nil
+        else
+          @status = 404
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
       end
     end #}}}
     class DoList < Riddl::Implementation #{{{
@@ -126,16 +127,18 @@ module CPEE
           end
           on resource 'symbols' do
             run DoList, 'symbols', opts[:data_dir] if get
-            on resource do
+            on resource '[a-z][a-zA-Z0-9_-]*\.svg' do
               run DoFile, 'symbols', opts[:data_dir], (-1..-1), 'svg', 'image/svg+xml' if get
               run DoPutFile, 'symbols', opts[:data_dir] if put 'symbol'
+              run DoDeleteFile, 'symbols', opts[:data_dir] if delete
             end
           end
           on resource 'schemas' do
             run DoList, 'schemas', opts[:data_dir] if get
-            on resource do
+            on resource '[a-z][a-zA-Z0-9_-]*\.rng' do
               run DoFile, 'schemas', opts[:data_dir], (-1..-1), 'rng', 'text/xml' if get
               run DoPutFile, 'schemas', opts[:data_dir] if put 'schema'
+              run DoDeleteFile, 'schemas', opts[:data_dir] if delete
             end
           end
           on resource 'endpoints' do
