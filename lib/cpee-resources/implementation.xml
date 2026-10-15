@@ -23,12 +23,6 @@
   <message name="list">
     <parameter name="list" mimetype="*/xml"/>
   </message>
-  <message name="exists">
-    <choice>
-      <parameter name="exists" mimetype="*/xml"/>
-      <parameter name="exists" mimetype="text/plain"/>
-    </choice>
-  </message>
   <message name="testset">
     <choice>
       <parameter name="testset" mimetype="*/xml"/>
@@ -36,16 +30,10 @@
     </choice>
   </message>
   <message name="symbol">
-    <choice>
-      <parameter name="svg" mimetype="image/svg+xml"/>
-      <parameter name="exists" mimetype="text/plain"/>
-    </choice>
+    <parameter name="*" mimetype="image/svg+xml"/>
   </message>
   <message name="schema">
-    <choice>
-      <parameter name="rng" mimetype="*/xml"/>
-      <parameter name="exists" mimetype="text/plain"/>
-    </choice>
+    <parameter name="*" mimetype="*/xml"/>
   </message>
   <message name="json">
     <choice>
@@ -67,7 +55,7 @@
       <resource>
         <get out="list"/>
         <resource>
-          <get out="exists"/>
+          <get out="list"/>
           <resource relative="patch.xml">
             <get out="testset"/>
           </resource>
@@ -87,19 +75,21 @@
       <get out="list"/>
       <resource>
         <get out="symbol"/>
+        <put in="symbol"/>
       </resource>
     </resource>
     <resource relative='schemas'>
       <get out="list"/>
       <resource>
         <get out="schema"/>
+        <put in="schema"/>
       </resource>
     </resource>
     <resource relative='endpoints'>
       <get in="dfilter" out="list"/>
       <get in="*" out="list"/>
       <resource>
-        <get out="exists"/>
+        <get out="list"/>
         <resource relative="symbol.svg">
           <get out="symbol"/>
         </resource>

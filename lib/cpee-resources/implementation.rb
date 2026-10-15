@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 require 'json'
+require 'fileutils'
 require 'riddl/server'
 
 module CPEE
@@ -25,54 +26,38 @@ module CPEE
     SERVER = File.expand_path(File.join(__dir__,'implementation.xml'))
     NOT_FOUND = 'Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)'
 
-    class DoExists < Riddl::Implementation #{{{
-      def response
-        data = @a[1]
-        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
-        if Dir.exist?(dir)
-          return Riddl::Parameter::Complex.new('exists','text/xml') do
-            doc = XML::Smart::string('<resource/>')
-            doc.root.add('schema','schema.rng') if File.exist?(File.join(dir,'schema.rng'))
-            doc.root.add('symbol','symbol.svg') if File.exist?(File.join(dir,'symbol.svg'))
-            doc.root.add('properties','properties.json') if File.exist?(File.join(dir,'properties.json'))
-            doc.root.add('descriptions') if Dir.exist?(File.join(dir,'descriptions'))
-            doc.to_s
-          end
-        else
-          @status = 404
-          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
-        end
-      end
-    end #}}}
-    class DoModExists < Riddl::Implementation #{{{
-      def response
-        data = @a[1]
-        dir = File.join(data,'modifiers',Riddl::Protocols::Utils::escape(@r[-2]),Riddl::Protocols::Utils::escape(@r[-1]))
-        if Dir.exist?(dir)
-          Riddl::Parameter::Complex.new('exists','text/xml') do
-            doc = XML::Smart::string('<resource/>')
-            doc.root.add('patch','patch.xml') if File.exist?(File.join(dir,'patch.xml'))
-            doc.root.add('unpatch','unpatch.xml') if File.exist?(File.join(dir,'unpatch.xml'))
-            doc.root.add('condition','condition.json') if File.exist?(File.join(dir,'condition.json'))
-            doc.root.add('ui','ui.rng') if File.exist?(File.join(dir,'ui.rng'))
-            doc.to_s
-          end
-        else
-          @status = 404
-          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
-        end
-      end
-    end #}}}
     class DoFile < Riddl::Implementation #{{{
       def response
         data = @a[1]
         file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
-        if File.exist?(file) && (@r[@a[2]] & ['.','..']).empty?
+        if File.exist?(file)
           Riddl::Parameter::Complex.new(@a[3],@a[4],File.read(file))
         else
           @status = 404
           Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
         end
+      end
+    end #}}}
+    class DoPutFile < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        name = @r[-1]
+        content = @p[0].value
+        content = content.read if content.respond_to?(:read)
+        begin
+          XML::Smart::string(content)
+        rescue => e
+          @status = 400
+          return Riddl::Parameter::Complex.new('error','text/plain',"Not well-formed XML: #{e.message}")
+        end
+        dir = File.join(data,@a[0])
+        file = File.join(dir,Riddl::Protocols::Utils::escape(name))
+        tmp = File.join(dir,'.' + Riddl::Protocols::Utils::escape(name) + '.tmp')
+        @status = File.exist?(file) ? 200 : 201
+        FileUtils.mkdir_p(dir)
+        File.write(tmp,content)
+        File.rename(tmp,file)
+        nil
       end
     end #}}}
     class DoList < Riddl::Implementation #{{{
@@ -87,6 +72,7 @@ module CPEE
         return Riddl::Parameter::Complex.new('list','text/xml') do
           doc = XML::Smart::string('<resources/>')
           Dir.glob(File.join(dir,'*')).sort.each do |f|
+            next if @a[4] && !@a[4].include?(File.basename(f))
             doc.root.add('resource',File.basename(f))
           end
           doc.to_s
@@ -122,7 +108,7 @@ module CPEE
             on resource do
               run DoList, 'modifiers', opts[:data_dir], (-1..-1) if get
               on resource do
-                run DoModExists, 'modifiers', opts[:data_dir] if get
+                run DoList, 'modifiers', opts[:data_dir], (-2..-1), true, %w{patch.xml unpatch.xml condition.json ui.rng} if get
                 on resource 'patch.xml' do
                   run DoFile, 'modifiers', opts[:data_dir], (-3..-1), 'testset', 'text/xml' if get
                 end
@@ -142,19 +128,21 @@ module CPEE
             run DoList, 'symbols', opts[:data_dir] if get
             on resource do
               run DoFile, 'symbols', opts[:data_dir], (-1..-1), 'svg', 'image/svg+xml' if get
+              run DoPutFile, 'symbols', opts[:data_dir] if put 'symbol'
             end
           end
           on resource 'schemas' do
             run DoList, 'schemas', opts[:data_dir] if get
             on resource do
               run DoFile, 'schemas', opts[:data_dir], (-1..-1), 'rng', 'text/xml' if get
+              run DoPutFile, 'schemas', opts[:data_dir] if put 'schema'
             end
           end
           on resource 'endpoints' do
             run DoDescList, 'endpoints', opts[:data_dir] if get 'dfilter'
             run DoList, 'endpoints', opts[:data_dir] if get
             on resource do
-              run DoExists, 'endpoints', opts[:data_dir] if get
+              run DoList, 'endpoints', opts[:data_dir], (-1..-1), true, %w{schema.rng symbol.svg properties.json descriptions} if get
               on resource 'symbol.svg' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
               end
@@ -165,7 +153,7 @@ module CPEE
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
               end
               on resource 'descriptions' do
-                run DoList, 'endpoints', opts[:data_dir], (-2..-1), true if get
+                run DoList, 'endpoints', opts[:data_dir], (-2..-1), true, %w{functionality.md output.md endpoint.md} if get
                 on resource 'functionality.md' do
                   run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
                 end
