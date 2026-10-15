@@ -48,6 +48,32 @@ module CPEE
         nil
       end
     end #}}}
+    class DoPutEndpointFile < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-2]))
+        file = File.join(dir,@r[-1])
+        unless Dir.exist?(dir)
+          @status = 404
+          return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+        if @p[0].name == 'name'
+          target = File.join('..','..',@a[2],@p[0].value)
+          unless File.exist?(File.join(dir,target))
+            @status = 404
+            return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+          end
+          File.unlink(file) if File.symlink?(file) || File.exist?(file)
+          File.symlink(target,file)
+        else
+          File.unlink(file) if File.symlink?(file)
+          File.open(file,'wb') do |f|
+            IO.copy_stream(@p[0].value,f)
+          end
+        end
+        nil
+      end
+    end #}}}
     class DoDeleteFile < Riddl::Implementation #{{{
       def response
         data = @a[1]
@@ -59,6 +85,18 @@ module CPEE
           @status = 404
           Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
         end
+      end
+    end #}}}
+    class DoNewEndpoint < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@p[0].value))
+        Dir.mkdir(dir)
+        @status = 201
+        nil
+      rescue Errno::EEXIST
+        @status = 409
+        Riddl::Parameter::Complex.new('exists','text/plain','Endpoint already exists.')
       end
     end #}}}
     class DoList < Riddl::Implementation #{{{
@@ -144,13 +182,16 @@ module CPEE
           on resource 'endpoints' do
             run DoDescList, 'endpoints', opts[:data_dir] if get 'dfilter'
             run DoList, 'endpoints', opts[:data_dir] if get
+            run DoNewEndpoint, 'endpoints', opts[:data_dir] if post 'endpoint'
             on resource do
               run DoList, 'endpoints', opts[:data_dir], (-1..-1), true, %w{schema.rng symbol.svg properties.json descriptions} if get
               on resource 'symbol.svg' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
+                run DoPutEndpointFile, 'endpoints', opts[:data_dir], 'symbols' if put 'endpoint-symbol'
               end
               on resource 'schema.rng' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if get
+                run DoPutEndpointFile, 'endpoints', opts[:data_dir], 'schemas' if put 'endpoint-schema'
               end
               on resource 'properties.json' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get

@@ -23,6 +23,9 @@
   <message name="list">
     <parameter name="list" mimetype="*/xml"/>
   </message>
+  <message name="endpoint">
+    <parameter name="name" type="string"/>
+  </message>
   <message name="testset">
     <choice>
       <parameter name="testset" mimetype="*/xml"/>
@@ -34,6 +37,22 @@
   </message>
   <message name="schema">
     <parameter name="*" mimetype="*/xml"/>
+  </message>
+  <message name="endpoint-symbol">
+    <choice>
+      <parameter name="file" mimetype="image/svg+xml"/>
+      <parameter name="name" type="string">
+        <param name="pattern">[a-z][a-zA-Z0-9_-]*\.svg</param>
+      </parameter>
+    </choice>
+  </message>
+  <message name="endpoint-schema">
+    <choice>
+      <parameter name="file" mimetype="*/xml"/>
+      <parameter name="name" type="string">
+        <param name="pattern">[a-z][a-zA-Z0-9_-]*\.rng</param>
+      </parameter>
+    </choice>
   </message>
   <message name="json">
     <choice>
@@ -90,14 +109,16 @@
     <resource relative='endpoints'>
       <get in="dfilter" out="list"/>
       <get in="*" out="list"/>
+      <post in="endpoint"/>
       <resource>
         <get out="list"/>
         <resource relative="symbol.svg">
           <get out="symbol"/>
+          <put in="endpoint-symbol"/>
         </resource>
         <resource relative="schema.rng">
           <get out="schema"/>
-          <put in="schema"/>
+          <put in="endpoint-schema"/>
         </resource>
         <resource relative="properties.json">
           <get out="json"/>
