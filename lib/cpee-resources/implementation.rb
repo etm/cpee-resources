@@ -23,6 +23,7 @@ module CPEE
   module Resources
 
     SERVER = File.expand_path(File.join(__dir__,'implementation.xml'))
+    NOT_FOUND = 'Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)'
 
     class DoExists < Riddl::Implementation #{{{
       def response
@@ -39,7 +40,7 @@ module CPEE
           end
         else
           @status = 404
-          Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
         end
       end
     end #}}}
@@ -58,7 +59,7 @@ module CPEE
           end
         else
           @status = 404
-          Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
         end
       end
     end #}}}
@@ -70,7 +71,7 @@ module CPEE
           Riddl::Parameter::Complex.new(@a[3],@a[4],File.read(file))
         else
           @status = 404
-          Riddl::Parameter::Complex.new('exists','text/plain','Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)')
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
         end
       end
     end #}}}
@@ -79,6 +80,10 @@ module CPEE
         data = @a[1]
         @a[2] ||= 0...0
         dir = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
+        if @a[3] && !Dir.exist?(dir)
+          @status = 404
+          return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
         return Riddl::Parameter::Complex.new('list','text/xml') do
           doc = XML::Smart::string('<resources/>')
           Dir.glob(File.join(dir,'*')).sort.each do |f|
@@ -111,6 +116,7 @@ module CPEE
 
       Proc.new do
         on resource do
+          run DoList, '', opts[:data_dir] if get
           on resource 'modifiers' do
             run DoList, 'modifiers', opts[:data_dir] if get
             on resource do
@@ -159,6 +165,7 @@ module CPEE
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
               end
               on resource 'descriptions' do
+                run DoList, 'endpoints', opts[:data_dir], (-2..-1), true if get
                 on resource 'functionality.md' do
                   run DoFile, 'endpoints', opts[:data_dir], (-3..-1), 'markdown', 'text/markdown' if get
                 end

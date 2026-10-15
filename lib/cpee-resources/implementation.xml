@@ -61,6 +61,7 @@
   </message>
 
   <resource>
+    <get out="list"/>
     <resource relative='modifiers'> <!--{{{-->
       <get out="list"/>
       <resource>
@@ -110,6 +111,7 @@
           <get out="json"/>
         </resource>
         <resource relative="descriptions">
+          <get out="list"/>
           <resource relative="functionality.md">
             <get out="markdown"/>
           </resource>
