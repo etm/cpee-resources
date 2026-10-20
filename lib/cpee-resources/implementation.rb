@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 require 'json'
+require 'fileutils'
 require 'riddl/server'
 
 module CPEE
@@ -182,6 +183,19 @@ module CPEE
         Riddl::Parameter::Complex.new('exists','text/plain','Endpoint already exists.')
       end
     end #}}}
+    class DoDeleteEndpoint < Riddl::Implementation #{{{
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
+        if Dir.exist?(dir)
+          FileUtils.rm_r(dir)
+          nil
+        else
+          @status = 404
+          Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+      end
+    end #}}}
     class DoList < Riddl::Implementation #{{{
       def response
         data = @a[1]
@@ -269,6 +283,7 @@ module CPEE
             run DoNewEndpoint, 'endpoints', opts[:data_dir] if post 'endpoint'
             on resource do
               run DoList, 'endpoints', opts[:data_dir], (-1..-1), true, %w{schema.rng symbol.svg properties.json descriptions}, %w{properties.json} if get
+              run DoDeleteEndpoint, 'endpoints', opts[:data_dir] if delete
               on resource 'symbol.svg' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
                 run DoPutEndpointFile, 'endpoints', opts[:data_dir], 'symbols' if put 'endpoint-symbol'

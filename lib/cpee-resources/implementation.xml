@@ -121,6 +121,7 @@
       <post in="endpoint"/>
       <resource>
         <get out="list"/>
+        <delete/>
         <resource relative="symbol.svg">
           <get out="symbol"/>
           <put in="endpoint-symbol"/>
