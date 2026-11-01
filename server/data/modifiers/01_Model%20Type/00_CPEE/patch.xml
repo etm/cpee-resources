@@ -7,5 +7,6 @@
     <description type='copy'/>
     <dataelements type='none'/>
     <endpoints type='none'/>
+    <dslx type='copy'/>
   </transformation>
 </testset>

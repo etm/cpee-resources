@@ -7,5 +7,6 @@
     <description type='rest'>http://localhost:9295/cpee/graphviz/</description>
     <dataelements type='none'/>
     <endpoints type='none'/>
+    <dslx type='none'/> <!-- cpee-transformation has no cpee to graphviz -->
   </transformation>
 </testset>

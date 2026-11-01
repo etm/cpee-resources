@@ -7,5 +7,6 @@
     <description type='rest'>http://localhost:9295/cpee/mermaid/</description>
     <dataelements type='none'/>
     <endpoints type='none'/>
+    <dslx type='rest'>http://localhost:9295/mermaid/cpee/</dslx>
   </transformation>
 </testset>
