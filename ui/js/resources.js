@@ -54,6 +54,7 @@ const SCHEMA_TEMPLATE =
 const PREVIEW_THEMES = ['preset','extended'];
 
 var adaptors = {}; // theme -> WfAdaptor, null if the theme could not be loaded
+var icons = {};
 var themes_loaded = Promise.resolve();
 var current = {
   schemas: { name: undefined, orig: {}, editors: {} },
@@ -182,10 +183,18 @@ function thumbnail(name,td) { //{{{
         if (!adaptors['extended']) { return; }
         td.empty();
         try {
-          let g = draw_symbol(td,'extended','',icon);
-          let pos = /translate\(([-\d.]+),([-\d.]+)\)/.exec(g.children('g').attr('transform'));
-          let svg = $('svg',td);
-          svg.attr('viewBox',pos[1] + ' ' + pos[2] + ' 30 30');
+          icons[name] = icon;
+          let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td); // has to be in the document, so that it can be measured
+          adaptors['extended'].set_svg_container(svg);
+          let g = adaptors['extended'].draw_element('call', 'thumbnail-' + (uid++), $('#iconpreview').attr('data-label'), { info: { 'element-endpoint': name } });
+          // symbol -> svg coordinates, incl. the group translate of set_svg. From the transforms
+          // themselves, getCTM does not work here, the list is drawn while its tab is hidden
+          let m = svg[0].createSVGMatrix();
+          for (let e = g.children('g')[0]; e != svg[0]; e = e.parentNode) {
+            let t = e.transform && e.transform.baseVal.consolidate();
+            if (t) { m = t.matrix.multiply(m); }
+          }
+          svg.attr('viewBox',m.e + ' ' + m.f + ' 30 30');
           svg.removeAttr('width').removeAttr('height');
         } catch(e) {
           td.empty().append(from_template('symbols','broken').attr('title',e.message));
@@ -457,7 +466,7 @@ function update_preview(kind) { //{{{
   } else {
     let note = $('#icondetail div.note');
     note.addClass('hidden');
-    let cells = $('#iconpreview td[data-state]');
+    let cells = $('#iconpreview tbody td');
     cells.empty();
     let icon;
     try {
@@ -480,41 +489,19 @@ function update_preview(kind) { //{{{
     $('p.themes span.url',note).text(themes_base);
     $('p.themes',note).toggleClass('hidden',missing.length == 0);
     note.toggleClass('hidden',$('p:not(.hidden)',note).length == 0);
+    icons[current.symbols.name] = icon;
     cells.each((_,td) => {
       let theme = $(td).closest('tr').attr('data-theme');
       if (!adaptors[theme]) { return; }
       try {
-        draw_symbol($(td),theme,$(td).attr('data-state'),icon);
+        let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td); // has to be in the document, so that it can be measured
+        adaptors[theme].set_svg_container(svg);
+        adaptors[theme].draw_element('call', 'preview-' + (uid++), $('#iconpreview').attr('data-label'), { info: { 'element-endpoint': current.symbols.name }, state: $(td).attr('data-state'), style: $(td).attr('data-color') ? { 'fill': $(td).attr('data-color') } : {} });
       } catch(e) {
         $(td).text(e.message);
       }
     });
   }
-} //}}}
-function draw_symbol(td,theme,state,icon) { //{{{
-  // drawn by wfadaptor.js like a call with an endpoint that has this icon,
-  // the state class is set like format_visual_set in the cockpit does
-  let ill = adaptors[theme].illustrator;
-  let svg = $(document.createElementNS(SVGNS,'svg'));
-  td.append(svg); // has to be in the document, so that it can be measured
-  ill.get_symbol = () => icon;
-  ill.set_svg_container(svg);
-  ill.clear();
-  let block = { 'max': { 'row': 1, 'col': 0 }, 'endnodes': [], 'svg': $X('<g class="group" xmlns="' + SVGNS + '"/>') };
-  let g = ill.draw.draw_symbol('call', 'preview-' + (uid++), $('#iconpreview').attr('data-label'), 1, 1, 1, 0, block.svg, true, { 'element-endpoint': 'preview' }, {});
-  g.off();
-  if (state) {
-    g.children('g').attr('class','activities ' + state);
-  } else { // as drawn, without any state class
-    g.children('g').removeAttr('class');
-  }
-  ill.set_svg(block);
-  // only the task: set_svg leaves about the same room on all sides of it (e.g. for the hover mark), 2px are kept
-  let [tx,ty] = /translate\(([-\d.]+),([-\d.]+)\)/.exec(g.children('g').attr('transform')).slice(1).map(Number);
-  let w = svg.attr('width') - 2 * tx + 4;
-  let h = svg.attr('height') - 2 * ty + 4;
-  svg.attr({ 'viewBox': (tx - 2) + ' ' + (ty - 2) + ' ' + w + ' ' + h, 'width': w, 'height': h });
-  return g;
 } //}}}
 function load_config() { //{{{
   let apply = (res) => {
@@ -546,7 +533,13 @@ function load_themes() { //{{{
       type: 'GET',
       url: themes_base + t + '/theme.js',
       dataType: 'text',
-      success: () => { new WfAdaptor(themes_base + t + '/theme.js',(adaptor) => { adaptors[t] = adaptor; resolve(); }); },
+      success: () => {
+        new WfAdaptor(themes_base + t + '/theme.js',(adaptor) => {
+          adaptor.illustrator.get_symbol = (name) => icons[name];
+          adaptors[t] = adaptor;
+          resolve();
+        });
+      },
       error: () => { adaptors[t] = null; resolve(); }
     });
   });
