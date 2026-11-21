@@ -43,6 +43,7 @@ module CPEE
         data = @a[1]
         name = @r[-1]
         file = File.join(data,@a[0],Riddl::Protocols::Utils::escape(name))
+        FileUtils.mkdir_p(File.dirname(file))
         File.open(file,'wb') do |f|
           IO.copy_stream(@p[0].value,f)
         end

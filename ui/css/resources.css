@@ -1,0 +1,175 @@
+/* list (like the models list of the hub) {{{ */
+[is="x-ui-"] ui-rest > ui-content > ui-area.listcolumn {
+  flex: 1 1 0%;
+  padding: 0em 1em 1em 1em;
+  border-right: 1px solid var(--x-ui-border-color);
+  min-width: 12em;
+}
+div.text { padding-top: 1em; padding-bottom: 1em; }
+
+[is="x-ui-"] table.ui-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+[is="x-ui-"] table.ui-table thead th {
+  font-weight: bold;
+  text-align: left;
+  padding: 0.3em 0.5em;
+}
+[is="x-ui-"] table.ui-table tbody td {
+  padding: 0.1em 0.5em;
+  cursor: pointer;
+}
+[is="x-ui-"] table.ui-table tbody tr:nth-child(odd) td {
+  background-color: var(--x-ui-content-light-background);
+}
+[is="x-ui-"] table.ui-table tbody tr:hover td,
+[is="x-ui-"] table.ui-table tbody tr.active td {
+  background-color: var(--x-ui-content-hover-background);
+}
+[is="x-ui-"] table.ui-table tbody tr.selected td {
+  background-color: #99cee6b0;
+}
+[is="x-ui-"] table.ui-table tbody td[data-class=ops] {
+  font-size: 1.4em;
+  text-align: center;
+  width: 1.5em;
+}
+[is="x-ui-"] table.ui-table tbody td[data-class=name] {
+  white-space: nowrap;
+}
+[is="x-ui-"] table.ui-table tbody td[data-class=icon],
+[is="x-ui-"] table.ui-table tbody td[data-class=add] {
+  width: 1.5em;
+  text-align: center;
+  font-size: 1.7em;
+}
+[is="x-ui-"] table.ui-table tbody td[data-class=icon] svg {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+ui-dialogue { max-width: 30em; }
+[is="x-ui-"] ui-dialogue input { /* global ui.css makes it 30em wide */
+  width: 100%;
+  box-sizing: border-box;
+}
+[is="x-ui-"] ui-dialogue button { /* like buttons in ui-area */
+  width: initial;
+  padding: 0.7em 1.5em;
+}
+ui-dialogue p.message {
+  white-space: pre-wrap;
+  font-family: monospace, monospace;
+  font-size: 0.9em;
+  color: #cc0000;
+}
+/* }}} */
+
+/* details (like the details column of the cockpit) {{{ */
+[is="x-ui-"] ui-rest > ui-content > ui-area.detailcolumn {
+  flex: 2 1 0%;
+  padding: 0em 1em 1em 1em;
+}
+.hidden { display: none !important; }
+.detailcolumn div.nothing {
+  padding-top: 1em;
+  color: var(--x-ui-light-text-color, grey);
+}
+.detailcolumn div.head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--x-ui-background-color);
+  padding-top: 1em;
+  padding-bottom: 0.5em;
+}
+.detailcolumn div.head h1 {
+  margin: 0;
+  font-size: 1.3em;
+  flex: 1 1 auto;
+}
+.detailcolumn div.buttons {
+  display: flex;
+  gap: 0.5em;
+  padding-bottom: 0.5em;
+}
+.detailcolumn div.help {
+  margin-top: 1em;
+  padding-bottom: 0.5em;
+}
+.detailcolumn div.help strong {
+  font-size: 1.1em;
+}
+.detailcolumn div.help table {
+  border-collapse: collapse;
+  margin-top: 0.3em;
+}
+.detailcolumn div.help td {
+  padding: 0.1em 1em 0.1em 0;
+  vertical-align: top;
+}
+.detailcolumn div.help td:first-child {
+  font-family: monospace, monospace;
+  white-space: nowrap;
+}
+.detailcolumn div.buttons button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.detailcolumn h2 {
+  font-size: 1.1em;
+  margin: 1em 0 0.5em 0;
+}
+.detailcolumn div.editor {
+  margin-bottom: 0.5em;
+}
+.detailcolumn div.editor label.relaxngui_cell, .detailcolumn div.editor span.relaxngui_cell { /* the headings already tell what is edited */
+  display: none;
+}
+.detailcolumn div.editor ol[contenteditable] {
+  min-height: 3em;
+  margin-left: 0 !important;
+}
+.detailcolumn div.error {
+  white-space: pre-wrap;
+  font-family: monospace, monospace;
+  font-size: 0.9em;
+  color: #cc0000;
+  padding-bottom: 0.5em;
+}
+.detailcolumn div.note {
+  color: var(--x-ui-light-text-color, grey);
+  padding-bottom: 0.5em;
+}
+.detailcolumn div.note p {
+  margin: 0;
+}
+.detailcolumn div.preview {
+  border: 1px dashed var(--x-ui-border-color);
+  padding: 0.5em;
+}
+.detailcolumn table.preview {
+  border-collapse: collapse;
+}
+.detailcolumn table.preview th {
+  text-align: left;
+  font-weight: bold;
+  padding: 0.2em 1em 0.2em 0;
+}
+.detailcolumn table.preview thead th,
+.detailcolumn table.preview td {
+  text-align: center;
+}
+.detailcolumn table.preview td {
+  padding: 0.3em 1em 0.3em 0;
+  vertical-align: middle;
+}
+/* }}} */
+
+tr.contextmenuitem > .contextmenuicon i.uidash-icon {
+  font-size: 1.2em;
+}

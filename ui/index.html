@@ -1,0 +1,244 @@
+<!--
+  This file is part of CPEE-RESOURCES.
+
+  CPEE-RESOURCES is free software: you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by the
+  Free Software Foundation, either version 3 of the License, or (at your
+  option) any later version.
+
+  CPEE-RESOURCES is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+  more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with CPEE-RESOURCES (file LICENSE in the main directory). If not, see
+  <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title data-orig="Resources">Resources</title>
+
+    <!-- libs, do not modify. When local than load local libs. -->
+    <script type="text/javascript" src="/js_libs/jquery.min.js"></script>
+    <script type="text/javascript" src="/js_libs/uidash_util.js"></script>
+    <script type="text/javascript" src="/js_libs/uidash.js"></script>
+    <script type="text/javascript" src="/js_libs/uidash_custommenu.js"></script>
+    <script type="text/javascript" src="/js_libs/uidash_dialogue.js"></script>
+    <script type="text/javascript" src="/js_libs/relaxngui.js"></script>
+
+    <link   rel="stylesheet"      href="/js_libs/uidash_custommenu.css" type="text/css"/>
+    <link   rel="stylesheet"      href="/js_libs/uidash_dialogue.css" type="text/css"/>
+    <link   rel="stylesheet"      href="/js_libs/uidash.css" type="text/css"/>
+    <link   rel="stylesheet"      href="/js_libs/relaxngui.css" type="text/css"/>
+
+    <link   rel="stylesheet"      href="/global_ui/ui.css" type="text/css"/>
+
+    <!-- icon previews are drawn like in the cockpit, the themes (and their base.js) come from themes-url in config.json -->
+    <script type="text/javascript" src="/js_libs/wfadaptor.js"></script>
+    <link   rel="stylesheet"      href="/js_libs/wfadaptor.css" type="text/css"/>
+
+    <!-- custom stuff, play arround  -->
+    <link   rel="stylesheet"      href="css/resources.css" type="text/css"/>
+    <script type="text/javascript" src="js/resources.js"></script>
+  </head>
+  <body is="x-ui-">
+    <ui-rest id="main">
+      <ui-tabbar>
+        <ui-before                                 ></ui-before>
+        <ui-tab class=""         data-tab="schemas">Schemas</ui-tab>
+        <ui-tab class="inactive" data-tab="icons"  >Icons</ui-tab>
+        <ui-behind                                 ></ui-behind>
+        <ui-last                                   ><a class="logo" href=".."></a></ui-last>
+      </ui-tabbar>
+      <ui-content class="noselect">
+        <ui-area data-belongs-to-tab="schemas" class="listcolumn"> <!--{{{-->
+          <div class="text">
+            Schemas (RelaxNG) describe the arguments of an endpoint. Endpoints
+            can link to them, so a schema can be shared between many endpoints.
+          </div>
+          <table id="schemas" class="ui-table" data-kind="schemas" data-ext=".rng">
+            <thead>
+              <th></th>
+              <th>Name</th>
+              <th><abbr title='Operations'>Op</abbr></th>
+            </thead>
+            <tbody>
+              <tr class="new" title="create a new schema">
+                <td data-class="add"><i class="uidash-icon uidash-icon-add"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <template class="row">
+            <tr><td data-class="icon"><i class="uidash-icon uidash-icon-details"></i></td><td data-class="name"></td><td data-class="ops" title="click for operations"><span><i class="uidash-icon uidash-icon-operations"></i></span></td></tr>
+          </template>
+        </ui-area> <!--}}}-->
+        <ui-resizehandle data-belongs-to-tab="schemas" data-label="drag to resize"></ui-resizehandle>
+        <ui-area data-belongs-to-tab="schemas" class="detailcolumn" id="schemadetail"> <!--{{{-->
+          <div class="nothing">Select a schema on the left, or create a new one.</div>
+          <div class="detail hidden">
+            <div class="head">
+              <h1>Schema "<span class="name"></span>"</h1>
+            </div>
+            <div class="editor" data-part="schema" data-label="RelaxNG schema"></div>
+            <div class="buttons">
+              <button name="save" title="Ctrl+S" disabled>Save</button>
+              <button name="revert" disabled>Revert</button>
+            </div>
+            <div class="help">
+              How to use <a target="_blank" href="https://github.com/etm/relaxngui.js#readme">RelaxNGui</a>?
+            </div>
+            <h2>Preview</h2>
+            <div class="error hidden"></div>
+            <div class="preview" id="schemapreview"></div>
+          </div>
+        </ui-area> <!--}}}-->
+        <ui-area data-belongs-to-tab="icons" class="listcolumn inactive"> <!--{{{-->
+          <div class="text">
+            Icons (SVG) replace the default task symbol of an endpoint. Each
+            icon consists of four parts: <em>normal</em> (without label),
+            <em>start</em>, <em>middle</em> (holds the label) and <em>end</em>.
+          </div>
+          <table id="icons" class="ui-table" data-kind="symbols" data-ext=".svg">
+            <thead>
+              <th></th>
+              <th>Name</th>
+              <th><abbr title='Operations'>Op</abbr></th>
+            </thead>
+            <tbody>
+              <tr class="new" title="create a new icon">
+                <td data-class="add"><i class="uidash-icon uidash-icon-add"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <template class="row">
+            <tr><td data-class="icon"></td><td data-class="name"></td><td data-class="ops" title="click for operations"><span><i class="uidash-icon uidash-icon-operations"></i></span></td></tr>
+          </template>
+          <template class="broken">
+            <i class="uidash-icon uidash-icon-info" title="not well-formed"></i>
+          </template>
+        </ui-area> <!--}}}-->
+        <ui-resizehandle data-belongs-to-tab="icons" data-label="drag to resize" class="inactive"></ui-resizehandle>
+        <ui-area data-belongs-to-tab="icons" class="detailcolumn inactive" id="icondetail"> <!--{{{-->
+          <div class="nothing">Select an icon on the left, or create a new one.</div>
+          <div class="detail hidden">
+            <div class="head">
+              <h1>Icon "<span class="name"></span>"</h1>
+            </div>
+            <h2>Normal (no label)</h2>
+            <div class="editor" data-part="normal" data-label="SVG elements of part-normal"></div>
+            <h2>Start</h2>
+            <div class="editor" data-part="start"  data-label="SVG elements of part-start"></div>
+            <h2>Middle (label)</h2>
+            <div class="editor" data-part="middle" data-label="SVG elements of part-middle"></div>
+            <h2>End</h2>
+            <div class="editor" data-part="end"    data-label="SVG elements of part-end"></div>
+            <div class="buttons">
+              <button name="save" title="Ctrl+S" disabled>Save</button>
+              <button name="revert" disabled>Revert</button>
+            </div>
+            <div class="help">
+              <strong>How to design <a target="_blank" href="https://github.com/etm/cpee-layout/blob/main/THEMES.MD#6-defining-element-looks---svg-symbols">icons</a>?</strong> The most important classes:
+              <table>
+                <tbody>
+                  <tr><td>execstyle</td><td>Stroke that shows the execution state (passive, active, vote); put it on the outline of the icon.</td></tr>
+                  <tr><td>execstylethin</td><td>Same as execstyle, but thinner.</td></tr>
+                  <tr><td>colorstyle</td><td>Receives the per-element style (e.g. a custom colour).</td></tr>
+                  <tr><td>stand</td><td>Default outline: background fill, dark stroke.</td></tr>
+                  <tr><td>standthin / standfat</td><td>Like stand, but with a thinner / thicker stroke.</td></tr>
+                  <tr><td>standwithout</td><td>Background fill only, no stroke (e.g. the middle part behind the label).</td></tr>
+                  <tr><td>standline</td><td>Dark line without fill (e.g. the top and bottom line of the middle part).</td></tr>
+                  <tr><td>normal</td><td>Solid dark fill, for glyphs.</td></tr>
+                  <tr><td>black / grey / white</td><td>Solid shapes in dark, light grey, or background colour (white covers what is beneath).</td></tr>
+                  <tr><td>label</td><td>On the empty &lt;text&gt; in the middle part; the label is filled in when drawing.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h2>Preview</h2>
+            <div class="error hidden"></div>
+            <div class="note hidden">
+              <p class="onlynormal">Only a normal part: the icon has no place for a label, so no label is shown, also in themes with labels.</p>
+              <p class="fallback">Empty parts (<span class="parts"></span>) are taken from the default call symbol of the theme.</p>
+              <p class="nostart">Without a start part, the normal part is used as start.</p>
+              <p class="noend">With a middle but without an end part, the default end is removed as well, so the middle is not clipped after the label.</p>
+              <p class="themes">Themes (<span class="themes"></span>) could not be loaded from <span class="url"></span>.</p>
+            </div>
+            <table class="preview" id="iconpreview" data-label="Task Label">
+              <thead>
+                <tr><th></th><th>normal</th><th>active</th><th>passive</th><th>vote</th></tr>
+              </thead>
+              <tbody>
+                <tr data-theme="preset"><th>Label</th><td data-state=""></td><td data-state="active"></td><td data-state="passive"></td><td data-state="vote"></td></tr>
+                <tr data-theme="extended"><th>Narrow</th><td data-state=""></td><td data-state="active"></td><td data-state="passive"></td><td data-state="vote"></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </ui-area> <!--}}}-->
+      </ui-content>
+    </ui-rest>
+
+    <ui-dialogue class="new" data-kind="schemas">
+      <p>
+        Create an empty schema. The name starts with a lowercase letter,
+        followed by letters, digits, underlines and dashes (no extension
+        necessary). If a schema of the same name already exists, it is opened
+        instead.
+      </p>
+      <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="Schema name (no extension necessary)."/></p>
+      <button>create</button>
+    </ui-dialogue>
+    <ui-dialogue class="new" data-kind="symbols">
+      <p>
+        Create an empty icon, consisting of the four parts normal, start,
+        middle and end. The name starts with a lowercase letter, followed by
+        letters, digits, underlines and dashes (no extension necessary). If an
+        icon of the same name already exists, it is opened instead.
+      </p>
+      <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="Icon name (no extension necessary)."/></p>
+      <button>create</button>
+    </ui-dialogue>
+
+    <ui-dialogue class="duplicate">
+      <p>
+        Duplicate "<span class="name"></span>". The new name starts with a
+        lowercase letter, followed by letters, digits, underlines and dashes
+        (no extension necessary).
+      </p>
+      <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="New name (no extension necessary)." data-exists="This name already exists."/></p>
+      <button>duplicate</button>
+    </ui-dialogue>
+    <ui-dialogue class="rename">
+      <p>
+        Rename "<span class="name"></span>". The new name starts with a
+        lowercase letter, followed by letters, digits, underlines and dashes
+        (no extension necessary).
+      </p>
+      <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="New name (no extension necessary)." data-exists="This name already exists."/></p>
+      <button>rename</button>
+    </ui-dialogue>
+    <ui-dialogue class="delete">
+      <p>Delete "<span class="name"></span>"? This can not be undone.</p>
+      <button>delete</button>
+    </ui-dialogue>
+    <ui-dialogue class="discard">
+      <p>"<span class="name"></span>" has unsaved changes. Discard them?</p>
+      <button>discard</button>
+    </ui-dialogue>
+    <ui-dialogue class="notsaved">
+      <p>"<span class="name"></span>" was not saved, it is not well-formed:</p>
+      <p class="message"></p>
+    </ui-dialogue>
+    <ui-dialogue class="failed">
+      <p data-action="load">Could not load "<span class="name"></span>" (<span class="status"></span>).</p>
+      <p data-action="save">Could not save "<span class="name"></span>" (<span class="status"></span>).</p>
+      <p data-action="delete">Could not delete "<span class="name"></span>" (<span class="status"></span>).</p>
+    </ui-dialogue>
+  </body>
+</html>
