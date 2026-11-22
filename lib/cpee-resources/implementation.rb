@@ -18,11 +18,12 @@
 
 require 'json'
 require 'fileutils'
+require 'open3'
 require 'riddl/server'
 
 module CPEE
   module Resources
-
+    GIT_LOCK = Mutex.new
     SERVER = File.expand_path(File.join(__dir__,'implementation.xml'))
     NOT_FOUND = 'Existence really is an imperfect tense that never becomes a present. (Friedrich Nietzsche)'
 
@@ -36,6 +37,38 @@ module CPEE
           @status = 404
           Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
         end
+      end
+    end #}}}
+    def self::author(h) #{{{
+      # like in cpee-model-management, from the DN of the authentication
+      dn = h['DN'] ? h['DN'].split(',').map{ |e| e.split('=',2) }.to_h : {}
+      dn['GN'] && dn['SN'] ? dn['GN'] + ' ' + dn['SN'] : 'Christine Ashcreek'
+    end #}}}
+    def self::git_init(data) #{{{
+      # data has to be a repository of its own, one around it (e.g. the code
+      # with the default data) does not count
+      root = File.realpath(data)
+      top, status = Open3.capture2e('git','rev-parse','--show-toplevel',chdir: root)
+      return if status.success? && top.strip == root
+      Open3.capture2e('git','init','-q',chdir: root)
+      Open3.capture2e('git','add','-A',chdir: root)
+      Open3.capture2e('git','-c','user.name=Christine Ashcreek','-c','user.email=dev@null.com','commit','-q','-m','initial',chdir: root)
+      puts "➡ Data directory #{root} is now a git repository"
+    end #}}}
+    def self::git_commit(data,path,h,op) #{{{
+      # commits the change of path (file or directory, also when deleted) in
+      # the background, data is a repository (git_init)
+      author = CPEE::Resources::author(h)
+      Thread.new do
+        GIT_LOCK.synchronize do
+          root = File.realpath(data)
+          abs = File.join(File.realpath(File.dirname(path)),File.basename(path))
+          msg = op + ' ' + abs.delete_prefix(root + '/')
+          Open3.capture2e('git','add','-A','--',abs,chdir: root)
+          Open3.capture2e('git','-c','user.name=' + author,'-c','user.email=dev@null.com','commit','-q','-m',msg,'--',abs,chdir: root)
+        end
+      rescue => e
+        warn 'git commit of ' + path + ' failed: ' + e.message
       end
     end #}}}
     def self::notify(conns,kind,op,name,content=nil) #{{{
@@ -67,6 +100,7 @@ module CPEE
           IO.copy_stream(@p[0].value,f)
         end
         CPEE::Resources::notify(@a[2],@a[0],op,name,File.read(file)) if @a[2]
+        CPEE::Resources::git_commit(data,file,@h,op)
         nil
       end
     end #}}}
@@ -83,6 +117,7 @@ module CPEE
         File.open(File.join(ddir,@r[-1]),'wb') do |f|
           IO.copy_stream(@p[0].value,f)
         end
+        CPEE::Resources::git_commit(data,File.join(ddir,@r[-1]),@h,'update')
         nil
       end
     end #}}}
@@ -109,6 +144,7 @@ module CPEE
             IO.copy_stream(@p[0].value,f)
           end
         end
+        CPEE::Resources::git_commit(data,file,@h,'update')
         nil
       end
     end #}}}
@@ -119,6 +155,7 @@ module CPEE
         if File.exist?(file) || File.symlink?(file)
           File.delete(file)
           CPEE::Resources::notify(@a[3],@a[0],'delete',@r[-1]) if @a[3]
+          CPEE::Resources::git_commit(data,file,@h,'delete')
           nil
         else
           @status = 404
@@ -172,6 +209,7 @@ module CPEE
         props = File.exist?(file) && !File.read(file).strip.empty? ? JSON.parse(File.read(file)) : {}
         props[key] = @p[0].value
         File.write(file,JSON.pretty_generate(props))
+        CPEE::Resources::git_commit(data,file,@h,'update')
         nil
       end
     end #}}}
@@ -185,6 +223,7 @@ module CPEE
         if props.key?(key)
           props.delete(key)
           File.write(file,JSON.pretty_generate(props))
+          CPEE::Resources::git_commit(data,file,@h,'update')
           nil
         else
           @status = 404
@@ -198,6 +237,7 @@ module CPEE
         dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@p[0].value))
         Dir.mkdir(dir)
         File.write(File.join(dir,'properties.json'),'{}')
+        CPEE::Resources::git_commit(data,dir,@h,'create')
         @status = 201
         nil
       rescue Errno::EEXIST
@@ -211,6 +251,7 @@ module CPEE
         dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
         if Dir.exist?(dir)
           FileUtils.rm_r(dir)
+          CPEE::Resources::git_commit(data,dir,@h,'delete')
           nil
         else
           @status = 404
@@ -268,6 +309,10 @@ module CPEE
               sse.send_with_id('heartbeat', '42') unless sse&.closed?
             end
           end
+        end
+
+        startup do
+          CPEE::Resources::git_init(opts[:data_dir])
         end
 
         on resource do
