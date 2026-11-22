@@ -60,6 +60,7 @@
             Schemas (RelaxNG) describe the arguments of an endpoint. Endpoints
             can link to them, so a schema can be shared between many endpoints.
           </div>
+          <input type="search" class="filter" data-kind="schemas" placeholder="Filter by name"/>
           <table id="schemas" class="ui-table" data-kind="schemas" data-ext=".rng">
             <thead>
               <th></th>
@@ -99,10 +100,10 @@
         </ui-area> <!--}}}-->
         <ui-area data-belongs-to-tab="icons" class="listcolumn inactive"> <!--{{{-->
           <div class="text">
-            Icons (SVG) replace the default task symbol of an endpoint. Each
-            icon consists of four parts: <em>normal</em> (without label),
-            <em>start</em>, <em>middle</em> (holds the label) and <em>end</em>.
+            Icons (SVG) replace the default task symbol of an endpoint. These
+            are global icons that endpoints can link to.
           </div>
+          <input type="search" class="filter" data-kind="symbols" placeholder="Filter by name"/>
           <table id="icons" class="ui-table" data-kind="symbols" data-ext=".svg">
             <thead>
               <th></th>

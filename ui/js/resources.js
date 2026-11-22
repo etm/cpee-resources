@@ -170,7 +170,14 @@ function add_row(kind,name,text) { //{{{
   if (name == current[kind].name) { tr.addClass('selected'); }
   let before = $('tbody tr:not(.new)',list(kind)).filter((_,r) => $(r).attr('data-name') < name).last();
   tr.insertAfter(before.length > 0 ? before : $('tbody tr.new',list(kind)));
+  filter(kind,tr);
   if (kind == 'symbols') { thumbnail(name,$('[data-class=icon]',tr),text); }
+} //}}}
+function filter(kind,rows) { //{{{
+  let f = $('input.filter[data-kind=' + kind + ']').val().trim().toLowerCase();
+  (rows || $('tbody tr:not(.new)',list(kind))).each((_,r) => {
+    $(r).toggleClass('hidden',f != '' && !base($(r).attr('data-name')).toLowerCase().includes(f));
+  });
 } //}}}
 function thumbnail(name,td,text) { //{{{
   // drawn like the narrow preview, cut to the 30x30 of the symbol. Without text it is loaded
@@ -616,6 +623,7 @@ $(document).ready(function() {
     });
 
     let tab = list(kind);
+    $('input.filter[data-kind=' + kind + ']').on('input',() => filter(kind));
     tab.on('click','tbody tr:not(.new) td:not([data-class=ops])',(e) => {
       let tr = $(e.currentTarget).closest('tr');
       select(kind,tr.attr('data-name'),$('td[data-class=name]',tr));
