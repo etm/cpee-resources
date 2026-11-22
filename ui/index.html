@@ -51,6 +51,7 @@
         <ui-before                                 ></ui-before>
         <ui-tab class=""         data-tab="schemas">Schemas</ui-tab>
         <ui-tab class="inactive" data-tab="icons"  >Icons</ui-tab>
+        <ui-tab class="inactive" data-tab="endpoints">Endpoints</ui-tab>
         <ui-behind                                 ></ui-behind>
         <ui-last                                   ><a class="logo" href=".."></a></ui-last>
       </ui-tabbar>
@@ -181,6 +182,48 @@
             </table>
           </div>
         </ui-area> <!--}}}-->
+        <ui-area data-belongs-to-tab="endpoints" class="listcolumn inactive"> <!--{{{-->
+          <div class="text">
+            Endpoints are the URLs that tasks call. Each has its own
+            properties, and can link to a global schema and icon.
+          </div>
+          <div class="filterbar">
+            <input type="search" class="filter" data-kind="endpoints" placeholder="Filter by URL"/>
+            <button class="agents" aria-pressed="false" title="Only endpoints with descriptions, i.e. that agents can use.">Agents</button>
+          </div>
+          <table id="endpoints" class="ui-table" data-kind="endpoints" data-ext="">
+            <thead>
+              <th></th>
+              <th>URL</th>
+              <th><abbr title='Operations'>Op</abbr></th>
+            </thead>
+            <tbody>
+              <tr class="new" title="create a new endpoint">
+                <td data-class="add"><i class="uidash-icon uidash-icon-add"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <template class="row">
+            <tr><td data-class="icon"><i class="uidash-icon uidash-icon-target"></i></td><td data-class="name"></td><td data-class="ops" title="click for operations"><span><i class="uidash-icon uidash-icon-operations"></i></span></td></tr>
+          </template>
+        </ui-area> <!--}}}-->
+        <ui-resizehandle data-belongs-to-tab="endpoints" title="drag to resize" class="inactive"></ui-resizehandle>
+        <ui-area data-belongs-to-tab="endpoints" class="detailcolumn inactive" id="endpointdetail"> <!--{{{-->
+          <div class="nothing">Select an endpoint on the left, or create a new one.</div>
+          <div class="detail hidden">
+            <div class="head">
+              <h1>Endpoint "<span class="name"></span>"</h1>
+            </div>
+            <h2>Properties</h2>
+            <div class="form" id="endpointform"></div>
+            <p class="buttons">
+              <button name="save" title="Ctrl+S" disabled>Save</button>
+              <button name="revert" disabled>Revert</button>
+            </p>
+          </div>
+        </ui-area> <!--}}}-->
       </ui-content>
     </ui-rest>
 
@@ -204,21 +247,30 @@
       <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="Icon name (no extension necessary)."/></p>
       <button>create</button>
     </ui-dialogue>
+    <ui-dialogue class="new" data-kind="endpoints">
+      <p>
+        Create an endpoint without properties, schema or icon. The name is the
+        URL that tasks call. If the endpoint already exists, it is opened
+        instead.
+      </p>
+      <p><input type="text" name="new" required placeholder="Endpoint URL, e.g. https://example.org/service/"/></p>
+      <button>create</button>
+    </ui-dialogue>
 
     <ui-dialogue class="duplicate">
       <p>
-        Duplicate "<span class="name"></span>". The new name starts with a
-        lowercase letter, followed by letters, digits, underlines and dashes
-        (no extension necessary).
+        Duplicate "<span class="name"></span>".<span class="rule"> The new name
+        starts with a lowercase letter, followed by letters, digits, underlines
+        and dashes (no extension necessary).</span>
       </p>
       <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="New name (no extension necessary)." data-exists="This name already exists."/></p>
       <button>duplicate</button>
     </ui-dialogue>
     <ui-dialogue class="rename">
       <p>
-        Rename "<span class="name"></span>". The new name starts with a
-        lowercase letter, followed by letters, digits, underlines and dashes
-        (no extension necessary).
+        Rename "<span class="name"></span>".<span class="rule"> The new name
+        starts with a lowercase letter, followed by letters, digits, underlines
+        and dashes (no extension necessary).</span>
       </p>
       <p><input type="text" name="new" required pattern="^[a-z][a-zA-Z0-9_\-]*" placeholder="New name (no extension necessary)." data-exists="This name already exists."/></p>
       <button>rename</button>

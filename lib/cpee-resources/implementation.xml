@@ -26,6 +26,13 @@
   <message name="endpoint">
     <parameter name="name" type="string"/>
   </message>
+  <message name="endpoint-copy">
+    <parameter name="name" type="string"/>
+    <parameter name="from" type="string"/>
+  </message>
+  <message name="properties">
+    <parameter name="*" mimetype="application/json"/>
+  </message>
   <message name="testset">
     <choice>
       <parameter name="testset" mimetype="*/xml"/>
@@ -121,6 +128,7 @@
     <resource relative='endpoints'>
       <get in="dfilter" out="list"/>
       <get in="*" out="list"/>
+      <post in="endpoint-copy"/>
       <post in="endpoint"/>
       <resource>
         <get out="list"/>
@@ -137,6 +145,7 @@
         </resource>
         <resource relative="properties.json">
           <get out="json"/>
+          <put in="properties"/>
           <resource>
             <get out="property-value"/>
             <put in="property"/>

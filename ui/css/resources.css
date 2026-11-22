@@ -10,6 +10,20 @@ ui-area.listcolumn input.filter {
   box-sizing: border-box;
   margin-bottom: 0.5em;
 }
+ui-area.listcolumn div.filterbar { /* filter and on/off buttons in one line */
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+}
+[is="x-ui-"] ui-area.listcolumn div.filterbar button[aria-pressed=true] { /* switched on */
+  background: var(--x-ui-active-color);
+  color: var(--x-ui-active-front-color);
+}
+ui-area.listcolumn div.filterbar input.filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
 
 [is="x-ui-"] table.ui-table {
   border-collapse: collapse;
@@ -42,6 +56,17 @@ ui-area.listcolumn input.filter {
 [is="x-ui-"] table.ui-table tbody td[data-class=name] {
   white-space: nowrap;
 }
+[is="x-ui-"] table#endpoints { /* long URLs are cut, the list does not grow */
+  table-layout: fixed;
+}
+[is="x-ui-"] table#endpoints thead th:first-child,
+[is="x-ui-"] table#endpoints thead th:last-child {
+  width: 2.5em;
+}
+[is="x-ui-"] table#endpoints tbody td[data-class=name] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 [is="x-ui-"] table.ui-table tbody td[data-class=icon],
 [is="x-ui-"] table.ui-table tbody td[data-class=add] {
   width: 1.5em;
@@ -54,13 +79,9 @@ ui-area.listcolumn input.filter {
   vertical-align: middle;
 }
 ui-dialogue { max-width: 30em; }
-[is="x-ui-"] ui-dialogue input { /* global ui.css makes it 30em wide */
+[is="x-ui-"] ui-dialogue input {
   width: 100%;
   box-sizing: border-box;
-}
-[is="x-ui-"] ui-dialogue button { /* like buttons in ui-area */
-  width: initial;
-  padding: 0.7em 1.5em;
 }
 ui-dialogue p.message {
   white-space: pre-wrap;
@@ -96,7 +117,7 @@ ui-dialogue p.message {
   font-size: 1.3em;
   flex: 1 1 auto;
 }
-.detailcolumn div.buttons {
+.detailcolumn .buttons {
   display: flex;
   gap: 0.5em;
   padding-bottom: 0.5em;
@@ -144,7 +165,7 @@ ui-dialogue p.message {
   font-family: monospace, monospace;
   white-space: nowrap;
 }
-.detailcolumn div.buttons button:disabled {
+.detailcolumn .buttons button:disabled {
   opacity: 0.5;
   cursor: default;
 }

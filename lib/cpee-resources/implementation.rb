@@ -209,6 +209,7 @@ module CPEE
         props = File.exist?(file) && !File.read(file).strip.empty? ? JSON.parse(File.read(file)) : {}
         props[key] = @p[0].value
         File.write(file,JSON.pretty_generate(props))
+        CPEE::Resources::notify(@a[2],@a[0],'update',@r[-3],File.read(file)) if @a[2]
         CPEE::Resources::git_commit(data,file,@h,'update')
         nil
       end
@@ -223,6 +224,7 @@ module CPEE
         if props.key?(key)
           props.delete(key)
           File.write(file,JSON.pretty_generate(props))
+          CPEE::Resources::notify(@a[2],@a[0],'update',@r[-3],File.read(file)) if @a[2]
           CPEE::Resources::git_commit(data,file,@h,'update')
           nil
         else
@@ -237,6 +239,7 @@ module CPEE
         dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@p[0].value))
         Dir.mkdir(dir)
         File.write(File.join(dir,'properties.json'),'{}')
+        CPEE::Resources::notify(@a[2],@a[0],'create',@p[0].value) if @a[2]
         CPEE::Resources::git_commit(data,dir,@h,'create')
         @status = 201
         nil
@@ -245,12 +248,60 @@ module CPEE
         Riddl::Parameter::Complex.new('exists','text/plain','Endpoint already exists.')
       end
     end #}}}
+    class DoCopyEndpoint < Riddl::Implementation #{{{
+      # with all its files, links to global schemas and symbols stay links
+      def response
+        data = @a[1]
+        name = @p[0].value
+        src = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@p[1].value))
+        dst = File.join(data,@a[0],Riddl::Protocols::Utils::escape(name))
+        unless Dir.exist?(src)
+          @status = 404
+          return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+        if File.exist?(dst)
+          @status = 409
+          return Riddl::Parameter::Complex.new('exists','text/plain','Endpoint already exists.')
+        end
+        FileUtils.cp_r(src,dst)
+        CPEE::Resources::notify(@a[2],@a[0],'create',name) if @a[2]
+        CPEE::Resources::git_commit(data,dst,@h,'create')
+        @status = 201
+        nil
+      end
+    end #}}}
+    class DoPutProperties < Riddl::Implementation #{{{
+      # the whole properties.json, without what DoProperties adds
+      def response
+        data = @a[1]
+        dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-2]))
+        file = File.join(dir,'properties.json')
+        unless Dir.exist?(dir)
+          @status = 404
+          return Riddl::Parameter::Complex.new('exists','text/plain',NOT_FOUND)
+        end
+        value = @p[0].value
+        value = value.read if value.respond_to?(:read)
+        props = JSON.parse(value) rescue nil
+        unless props.is_a?(Hash)
+          @status = 400
+          return nil
+        end
+        props.delete('global-schema')
+        props.delete('global-symbol')
+        File.write(file,JSON.pretty_generate(props))
+        CPEE::Resources::notify(@a[2],@a[0],'update',@r[-2],File.read(file)) if @a[2]
+        CPEE::Resources::git_commit(data,file,@h,'update')
+        nil
+      end
+    end #}}}
     class DoDeleteEndpoint < Riddl::Implementation #{{{
       def response
         data = @a[1]
         dir = File.join(data,@a[0],Riddl::Protocols::Utils::escape(@r[-1]))
         if Dir.exist?(dir)
           FileUtils.rm_r(dir)
+          CPEE::Resources::notify(@a[2],@a[0],'delete',@r[-1]) if @a[2]
           CPEE::Resources::git_commit(data,dir,@h,'delete')
           nil
         else
@@ -360,10 +411,11 @@ module CPEE
           on resource 'endpoints' do
             run DoDescList, 'endpoints', opts[:data_dir] if get 'dfilter'
             run DoList, 'endpoints', opts[:data_dir] if get
-            run DoNewEndpoint, 'endpoints', opts[:data_dir] if post 'endpoint'
+            run DoCopyEndpoint, 'endpoints', opts[:data_dir], opts[:receivers] if post 'endpoint-copy'
+            run DoNewEndpoint, 'endpoints', opts[:data_dir], opts[:receivers] if post 'endpoint'
             on resource do
               run DoList, 'endpoints', opts[:data_dir], (-1..-1), true, %w{schema.rng symbol.svg properties.json descriptions}, %w{properties.json} if get
-              run DoDeleteEndpoint, 'endpoints', opts[:data_dir] if delete
+              run DoDeleteEndpoint, 'endpoints', opts[:data_dir], opts[:receivers] if delete
               on resource 'symbol.svg' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
                 run DoPutEndpointFile, 'endpoints', opts[:data_dir], 'symbols' if put 'endpoint-symbol'
@@ -376,10 +428,11 @@ module CPEE
               end
               on resource 'properties.json' do
                 run DoProperties, 'endpoints', opts[:data_dir] if get
+                run DoPutProperties, 'endpoints', opts[:data_dir], opts[:receivers] if put 'properties'
                 on resource do
                   run DoGetProperty, 'endpoints', opts[:data_dir] if get
-                  run DoPutProperty, 'endpoints', opts[:data_dir] if put 'property'
-                  run DoDeleteProperty, 'endpoints', opts[:data_dir] if delete
+                  run DoPutProperty, 'endpoints', opts[:data_dir], opts[:receivers] if put 'property'
+                  run DoDeleteProperty, 'endpoints', opts[:data_dir], opts[:receivers] if delete
                 end
               end
               on resource 'descriptions' do
