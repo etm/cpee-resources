@@ -132,6 +132,12 @@ function failed(what,target,name,status) { //{{{
   $('span.status',dlg).text(status);
 } //}}}
 function show_error(kind,msg) { //{{{
+  if (kind == 'schemas') { // in place of the preview
+    let pre = $('#schemapreview');
+    $('div.error',pre).remove();
+    if (msg) { pre.empty().append($('<div class="error"/>').text(msg)); }
+    return;
+  }
   let err = $('div.error',detail(kind));
   if (msg) {
     err.text(msg).removeClass('hidden');
@@ -148,60 +154,92 @@ function paint(kind) { //{{{
     url: server + kind + '/',
     dataType: 'xml',
     success: (res) => {
-      let tb = $('tbody',list(kind));
-      $('tr:not(.new)',tb).remove();
-      $('resource',res).each((_,r) => {
-        let name = $(r).text();
-        let tr = from_template(kind,'row');
-        tr.attr('data-name',name);
-        $('[data-class=name]',tr).text(base(name));
-        if (name == current[kind].name) { tr.addClass('selected'); }
-        if (kind == 'symbols') { thumbnail(name,$('[data-class=icon]',tr)); }
-        tb.append(tr);
-      });
+      $('tr:not(.new)',$('tbody',list(kind))).remove();
+      $('resource',res).each((_,r) => { add_row(kind,$(r).text()); });
     },
     error: () => {
       $('tr:not(.new)',$('tbody',list(kind))).remove();
     }
   });
 } //}}}
-function thumbnail(name,td) { //{{{
-  // drawn like the narrow preview, cut to the 30x30 of the symbol
-  $.ajax({
-    type: 'GET',
-    url: server + 'symbols/' + name,
-    dataType: 'text',
-    success: (res) => {
-      let icon;
-      try {
-        icon = $XR(res);
-      } catch(e) {
-        td.empty().append(from_template('symbols','broken'));
-        return;
+function add_row(kind,name,text) { //{{{
+  // at its place, the list is sorted by name like the server does
+  let tr = from_template(kind,'row');
+  tr.attr('data-name',name);
+  $('[data-class=name]',tr).text(base(name));
+  if (name == current[kind].name) { tr.addClass('selected'); }
+  let before = $('tbody tr:not(.new)',list(kind)).filter((_,r) => $(r).attr('data-name') < name).last();
+  tr.insertAfter(before.length > 0 ? before : $('tbody tr.new',list(kind)));
+  if (kind == 'symbols') { thumbnail(name,$('[data-class=icon]',tr),text); }
+} //}}}
+function thumbnail(name,td,text) { //{{{
+  // drawn like the narrow preview, cut to the 30x30 of the symbol. Without text it is loaded
+  if (text === undefined) {
+    $.ajax({
+      type: 'GET',
+      url: server + 'symbols/' + name,
+      dataType: 'text',
+      success: (res) => thumbnail(name,td,res)
+    });
+    return;
+  }
+  let icon;
+  try {
+    icon = $XR(text);
+  } catch(e) {
+    td.empty().append(from_template('symbols','broken'));
+    return;
+  }
+  themes_loaded.then(() => {
+    if (!adaptors['extended']) { return; }
+    td.empty();
+    try {
+      icons[name] = icon;
+      let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td); // has to be in the document, so that it can be measured
+      adaptors['extended'].set_svg_container(svg);
+      let g = adaptors['extended'].draw_element('call', 'thumbnail-' + (uid++), $('#iconpreview').attr('data-label'), { info: { 'element-endpoint': name } });
+      // symbol -> svg coordinates, incl. the group translate of set_svg. From the transforms
+      // themselves, getCTM does not work here, the list is drawn while its tab is hidden
+      let m = svg[0].createSVGMatrix();
+      for (let e = g.children('g')[0]; e != svg[0]; e = e.parentNode) {
+        let t = e.transform && e.transform.baseVal.consolidate();
+        if (t) { m = t.matrix.multiply(m); }
       }
-      themes_loaded.then(() => {
-        if (!adaptors['extended']) { return; }
-        td.empty();
-        try {
-          icons[name] = icon;
-          let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td); // has to be in the document, so that it can be measured
-          adaptors['extended'].set_svg_container(svg);
-          let g = adaptors['extended'].draw_element('call', 'thumbnail-' + (uid++), $('#iconpreview').attr('data-label'), { info: { 'element-endpoint': name } });
-          // symbol -> svg coordinates, incl. the group translate of set_svg. From the transforms
-          // themselves, getCTM does not work here, the list is drawn while its tab is hidden
-          let m = svg[0].createSVGMatrix();
-          for (let e = g.children('g')[0]; e != svg[0]; e = e.parentNode) {
-            let t = e.transform && e.transform.baseVal.consolidate();
-            if (t) { m = t.matrix.multiply(m); }
-          }
-          svg.attr('viewBox',m.e + ' ' + m.f + ' 30 30');
-          svg.removeAttr('width').removeAttr('height');
-        } catch(e) {
-          td.empty().append(from_template('symbols','broken').attr('title',e.message));
-        }
-      });
+      svg.attr('viewBox',m.e + ' ' + m.f + ' 30 30');
+      svg.removeAttr('width').removeAttr('height');
+    } catch(e) {
+      td.empty().append(from_template('symbols','broken').attr('title',e.message));
     }
   });
+} //}}}
+function events(resync = false) { //{{{
+  // the lists follow the changes on the server, also those of others (see notify in implementation.rb)
+  let es = new EventSource(server + 'events/');
+  es.onopen = () => {
+    if (resync) { paint('schemas'); paint('symbols'); } // changes may have been missed in between
+    resync = true;
+  };
+  es.onerror = () => {
+    if (es.readyState == EventSource.CLOSED) { setTimeout(() => events(true), 5000); }
+  };
+  es.onmessage = (e) => {
+    let ev = JSON.parse(e.data);
+    let kind = ev.kind;
+    if (!current[kind]) { return; }
+    if (ev.op == 'delete') {
+      row(kind,ev.name).remove();
+      if (current[kind].name == ev.name) { unselect(kind); }
+      return;
+    }
+    if (row(kind,ev.name).length == 0) {
+      add_row(kind,ev.name,ev.content);
+    } else if (kind == 'symbols') {
+      thumbnail(ev.name,$('td[data-class=icon]',row(kind,ev.name)),ev.content);
+    }
+    if (current[kind].name == ev.name && !changed(kind) && !shows(kind,ev.content)) {
+      show_item(kind,ev.name,ev.content);
+    }
+  };
 } //}}}
 /* }}} */
 
@@ -219,23 +257,7 @@ function select(kind,name,target) { //{{{
     type: 'GET',
     url: server + kind + '/' + name,
     dataType: 'text',
-    success: (res) => {
-      current[kind].name = name;
-      $('tbody tr',list(kind)).removeClass('selected');
-      row(kind,name).addClass('selected');
-      let det = detail(kind);
-      $('div.nothing',det).addClass('hidden');
-      $('div.detail',det).removeClass('hidden');
-      $('div.head h1 span.name',det).text(base(name));
-      if (kind == 'schemas') {
-        editor_set(current.schemas.editors.schema,res.replace(/\s+$/,''));
-        current.schemas.orig.schema = editor_get(current.schemas.editors.schema);
-      } else {
-        load_icon(res);
-      }
-      update_state(kind);
-      update_preview(kind);
-    },
+    success: (res) => show_item(kind,name,res),
     error: (xhr) => { failed('load',target,name,xhr.status); }
   });
   if (name != current[kind].name) {
@@ -243,6 +265,38 @@ function select(kind,name,target) { //{{{
   } else {
     load();
   }
+} //}}}
+function show_item(kind,name,text) { //{{{
+  current[kind].name = name;
+  $('tbody tr',list(kind)).removeClass('selected');
+  row(kind,name).addClass('selected');
+  let det = detail(kind);
+  $('div.nothing',det).addClass('hidden');
+  $('div.detail',det).removeClass('hidden');
+  $('div.head h1 span.name',det).text(base(name));
+  if (kind == 'schemas') {
+    editor_set(current.schemas.editors.schema,text.replace(/\s+$/,''));
+    current.schemas.orig.schema = editor_get(current.schemas.editors.schema);
+  } else {
+    load_icon(text);
+  }
+  update_state(kind);
+  update_preview(kind);
+} //}}}
+function shows(kind,text) { //{{{
+  // whether the editors hold exactly this, e.g. after saving it
+  try {
+    if (kind == 'schemas') { return editor_get(current.schemas.editors.schema) == text.replace(/\s+$/,''); }
+    return $(compose_icon()).serializePrettyXML() == text;
+  } catch(e) {
+    return false;
+  }
+} //}}}
+function unselect(kind) { //{{{
+  current[kind].name = undefined;
+  current[kind].orig = {};
+  $('div.nothing',detail(kind)).removeClass('hidden');
+  $('div.detail',detail(kind)).addClass('hidden');
 } //}}}
 function load_icon(text) { //{{{
   let cur = current.symbols;
@@ -324,9 +378,6 @@ function save(kind) { //{{{
   put(kind,cur.name,text,button,() => {
     Object.keys(cur.editors).forEach((p) => { cur.orig[p] = editor_get(cur.editors[p]); });
     update_state(kind);
-    if (kind == 'symbols') {
-      thumbnail(cur.name,$('td[data-class=icon]',row(kind,cur.name)));
-    }
   });
 } //}}}
 function put(kind,name,text,target,success) { //{{{
@@ -366,7 +417,6 @@ function create(kind,nbase,target) { //{{{
     put(kind,name,text,target,() => {
       $('input',dlg).val('');
       current[kind].name = undefined; // nothing to discard anymore
-      paint(kind);
       select(kind,name,target);
     });
   });
@@ -378,15 +428,6 @@ function delete_it(kind,name) { //{{{
     $.ajax({
       type: 'DELETE',
       url: server + kind + '/' + name,
-      success: () => {
-        if (current[kind].name == name) {
-          current[kind].name = undefined;
-          current[kind].orig = {};
-          $('div.nothing',detail(kind)).removeClass('hidden');
-          $('div.detail',detail(kind)).addClass('hidden');
-        }
-        paint(kind);
-      },
       error: (xhr) => { failed('delete',target,name,xhr.status); }
     });
   });
@@ -417,20 +458,17 @@ function copy_it(kind,name,remove) { //{{{
       success: (res) => {
         put(kind,nname,res,target,() => {
           if (remove) {
+            // before the delete, its event must not close the renamed item
+            if (current[kind].name == name) {
+              current[kind].name = nname;
+              $('div.head h1 span.name',detail(kind)).text(base(nname));
+              row(kind,nname).addClass('selected');
+            }
             $.ajax({
               type: 'DELETE',
               url: server + kind + '/' + name,
-              success: () => {
-                if (current[kind].name == name) {
-                  current[kind].name = nname;
-                  $('div.head h1 span.name',detail(kind)).text(base(nname));
-                }
-                paint(kind);
-              },
               error: (xhr) => { failed('delete',target,name,xhr.status); }
             });
-          } else {
-            paint(kind);
           }
         });
       },
@@ -562,6 +600,10 @@ $(document).ready(function() {
   PARTS.forEach((p) => {
     current.symbols.editors[p] = create_editor($('#icondetail div.editor[data-part=' + p + ']'));
   });
+  $('div.help div.fold').on('click',(e) => {
+    if ($(e.target).closest('a').length > 0) { return; }
+    $(e.currentTarget).parent().toggleClass('closed');
+  });
   ['schemas','symbols'].forEach((kind) => {
     $('div.editor',detail(kind)).on('input relaxngui_change paste',() => {
       update_state(kind);
@@ -624,6 +666,7 @@ $(document).ready(function() {
 
   load_config().then(() => {
     themes_loaded = load_themes();
+    events();
     paint('schemas');
     paint('symbols');
     themes_loaded.then(() => { update_preview('symbols'); });

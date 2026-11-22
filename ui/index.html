@@ -78,7 +78,7 @@
             <tr><td data-class="icon"><i class="uidash-icon uidash-icon-details"></i></td><td data-class="name"></td><td data-class="ops" title="click for operations"><span><i class="uidash-icon uidash-icon-operations"></i></span></td></tr>
           </template>
         </ui-area> <!--}}}-->
-        <ui-resizehandle data-belongs-to-tab="schemas" data-label="drag to resize"></ui-resizehandle>
+        <ui-resizehandle data-belongs-to-tab="schemas" title="drag to resize"></ui-resizehandle>
         <ui-area data-belongs-to-tab="schemas" class="detailcolumn" id="schemadetail"> <!--{{{-->
           <div class="nothing">Select a schema on the left, or create a new one.</div>
           <div class="detail hidden">
@@ -94,7 +94,6 @@
               How to use <a target="_blank" href="https://github.com/etm/relaxngui.js#readme">RelaxNGui</a>?
             </div>
             <h2>Preview</h2>
-            <div class="error hidden"></div>
             <div class="preview" id="schemapreview"></div>
           </div>
         </ui-area> <!--}}}-->
@@ -125,7 +124,7 @@
             <i class="uidash-icon uidash-icon-info" title="not well-formed"></i>
           </template>
         </ui-area> <!--}}}-->
-        <ui-resizehandle data-belongs-to-tab="icons" data-label="drag to resize" class="inactive"></ui-resizehandle>
+        <ui-resizehandle data-belongs-to-tab="icons" title="drag to resize" class="inactive"></ui-resizehandle>
         <ui-area data-belongs-to-tab="icons" class="detailcolumn inactive" id="icondetail"> <!--{{{-->
           <div class="nothing">Select an icon on the left, or create a new one.</div>
           <div class="detail hidden">
@@ -144,8 +143,8 @@
               <button name="save" title="Ctrl+S" disabled>Save</button>
               <button name="revert" disabled>Revert</button>
             </div>
-            <div class="help">
-              <strong>How to design <a target="_blank" href="https://github.com/etm/cpee-layout/blob/main/THEMES.MD#6-defining-element-looks---svg-symbols">icons</a>?</strong> The most important classes:
+            <div class="help closed">
+              <div class="fold"><span class="foldicon"></span><strong>How to design <a target="_blank" href="https://github.com/etm/cpee-layout/blob/main/THEMES.MD#6-defining-element-looks---svg-symbols">icons</a>?</strong> The most important classes.</div>
               <table>
                 <tbody>
                   <tr><td>execstyle</td><td>Stroke that shows the execution state (passive, active, vote); put it on the outline of the icon.</td></tr>

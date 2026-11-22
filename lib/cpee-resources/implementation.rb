@@ -38,15 +38,35 @@ module CPEE
         end
       end
     end #}}}
+    def self::notify(conns,kind,op,name,content=nil) #{{{
+      what = { :kind => kind, :op => op, :name => name }
+      what[:content] = content unless content.nil?
+      what = JSON::generate(what)
+      conns.each do |e|
+        e.send what unless e.closed?
+      end
+    end #}}}
+    class Events < Riddl::SSEImplementation #{{{
+      def onopen
+        @conns = @a[0]
+        @conns << self
+      end
+      def onclose
+        @conns.delete(self)
+      end
+    end #}}}
+
     class DoPutFile < Riddl::Implementation #{{{
       def response
         data = @a[1]
         name = @r[-1]
         file = File.join(data,@a[0],Riddl::Protocols::Utils::escape(name))
+        op = File.exist?(file) ? 'update' : 'create'
         FileUtils.mkdir_p(File.dirname(file))
         File.open(file,'wb') do |f|
           IO.copy_stream(@p[0].value,f)
         end
+        CPEE::Resources::notify(@a[2],@a[0],op,name,File.read(file)) if @a[2]
         nil
       end
     end #}}}
@@ -98,6 +118,7 @@ module CPEE
         file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
         if File.exist?(file) || File.symlink?(file)
           File.delete(file)
+          CPEE::Resources::notify(@a[3],@a[0],'delete',@r[-1]) if @a[3]
           nil
         else
           @status = 404
@@ -237,9 +258,22 @@ module CPEE
 
     def self::implementation(opts)
       opts[:data_dir]           ||= File.expand_path(File.join(__dir__,'data'))
+      opts[:sse_keepalive_frequency] ||= 10
+      opts[:receivers] = []
 
       Proc.new do
+        parallel do
+          EM.add_periodic_timer(opts[:sse_keepalive_frequency]) do
+            opts[:receivers].each do |sse|
+              sse.send_with_id('heartbeat', '42') unless sse&.closed?
+            end
+          end
+        end
+
         on resource do
+          on resource 'events' do
+            run Events, opts[:receivers] if sse
+          end
           run DoList, '', opts[:data_dir] if get
           on resource 'modifiers' do
             run DoList, 'modifiers', opts[:data_dir] if get
@@ -266,16 +300,16 @@ module CPEE
             run DoList, 'symbols', opts[:data_dir] if get
             on resource '[a-z][a-zA-Z0-9_-]*\.svg' do
               run DoFile, 'symbols', opts[:data_dir], (-1..-1), 'svg', 'image/svg+xml' if get
-              run DoPutFile, 'symbols', opts[:data_dir] if put 'symbol'
-              run DoDeleteFile, 'symbols', opts[:data_dir], (-1..-1) if delete
+              run DoPutFile, 'symbols', opts[:data_dir], opts[:receivers] if put 'symbol'
+              run DoDeleteFile, 'symbols', opts[:data_dir], (-1..-1), opts[:receivers] if delete
             end
           end
           on resource 'schemas' do
             run DoList, 'schemas', opts[:data_dir] if get
             on resource '[a-z][a-zA-Z0-9_-]*\.rng' do
               run DoFile, 'schemas', opts[:data_dir], (-1..-1), 'rng', 'text/xml' if get
-              run DoPutFile, 'schemas', opts[:data_dir] if put 'schema'
-              run DoDeleteFile, 'schemas', opts[:data_dir], (-1..-1) if delete
+              run DoPutFile, 'schemas', opts[:data_dir], opts[:receivers] if put 'schema'
+              run DoDeleteFile, 'schemas', opts[:data_dir], (-1..-1), opts[:receivers] if delete
             end
           end
           on resource 'endpoints' do

@@ -2,7 +2,6 @@
 [is="x-ui-"] ui-rest > ui-content > ui-area.listcolumn {
   flex: 1 1 0%;
   padding: 0em 1em 1em 1em;
-  border-right: 1px solid var(--x-ui-border-color);
   min-width: 12em;
 }
 div.text { padding-top: 1em; padding-bottom: 1em; }
@@ -104,6 +103,30 @@ ui-dialogue p.message {
 .detailcolumn div.help strong {
   font-size: 1.1em;
 }
+.detailcolumn div.help div.fold {
+  cursor: pointer;
+}
+.detailcolumn div.help.closed table {
+  display: none;
+}
+.detailcolumn div.help span.foldicon:after {
+  font-family: uidash-icons !important;
+  font-style: normal;
+  font-weight: normal !important;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\f10c";
+  vertical-align: -3px;
+  margin-right: 0.5em;
+  position: relative;
+  top: -0.13em;
+}
+.detailcolumn div.help.closed span.foldicon:after {
+  content: "\f11b";
+}
 .detailcolumn div.help table {
   border-collapse: collapse;
   margin-top: 0.3em;
@@ -162,11 +185,14 @@ ui-dialogue p.message {
 }
 .detailcolumn table.preview thead th,
 .detailcolumn table.preview td {
-  text-align: center;
+  text-align: left;
 }
 .detailcolumn table.preview td {
   padding: 0.3em 1em 0.3em 0;
   vertical-align: middle;
+}
+.detailcolumn table.preview td svg {
+  overflow: visible; /* the hover mark is not part of the cropped box */
 }
 /* }}} */
 

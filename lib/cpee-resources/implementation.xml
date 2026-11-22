@@ -78,6 +78,9 @@
 
   <resource>
     <get out="list"/>
+    <resource relative='events'>
+      <sse/>
+    </resource>
     <resource relative='modifiers'> <!--{{{-->
       <get out="list"/>
       <resource>
