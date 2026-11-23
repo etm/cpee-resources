@@ -19,6 +19,19 @@ ui-area.listcolumn div.filterbar { /* filter and on/off buttons in one line */
   background: var(--x-ui-active-color);
   color: var(--x-ui-active-front-color);
 }
+.detailcolumn p.source label { /* none, own or global schema/icon of an endpoint */
+  margin-right: 1.5em;
+  white-space: nowrap;
+}
+.detailcolumn div.globals input.filter {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.5em;
+}
+.detailcolumn div.globals div.globallist { /* scrolls, the preview stays in reach */
+  max-height: 24em;
+  overflow-y: auto;
+}
 ui-area.listcolumn div.filterbar input.filter {
   flex: 1 1 auto;
   min-width: 0;
@@ -38,7 +51,7 @@ ui-area.listcolumn div.filterbar input.filter {
   padding: 0.1em 0.5em;
   cursor: pointer;
 }
-[is="x-ui-"] table.ui-table tbody tr:nth-child(odd of :not(.hidden)) td {
+[is="x-ui-"] table.ui-table tbody tr:where(:nth-child(odd of :not(.hidden))) td { /* where: hover and selected win */
   background-color: var(--x-ui-content-light-background);
 }
 [is="x-ui-"] table.ui-table tbody tr:hover td,
@@ -94,6 +107,12 @@ ui-dialogue p.message {
 /* details (like the details column of the cockpit) {{{ */
 [is="x-ui-"] ui-rest > ui-content > ui-area.detailcolumn {
   flex: 2 1 0%;
+  padding: 0em 1em 1em 1em;
+}
+[is="x-ui-"] ui-rest > ui-content > ui-area#endpointdetail { /* tabbed: the padding goes to the inner areas */
+  padding: 0;
+}
+[is="x-ui-"] #endpointdetail > ui-content > ui-area {
   padding: 0em 1em 1em 1em;
 }
 .hidden { display: none !important; }
@@ -196,6 +215,21 @@ ui-dialogue p.message {
 }
 .detailcolumn div.note p {
   margin: 0;
+}
+.detailcolumn div.descpart h2 button { /* add or delete the part */
+  margin-left: 1em;
+  font-size: 0.8em;
+  font-weight: normal;
+  vertical-align: baseline;
+}
+.detailcolumn div.descpart div.absent {
+  color: var(--x-ui-light-text-color, grey);
+  font-style: italic;
+  padding-bottom: 0.5em;
+}
+.detailcolumn div.descpart.missing div.editor, .detailcolumn div.descpart.missing button[name=delete],
+.detailcolumn div.descpart:not(.missing) div.absent, .detailcolumn div.descpart:not(.missing) button[name=add] {
+  display: none;
 }
 .detailcolumn div.preview {
   border: 1px dashed var(--x-ui-border-color);

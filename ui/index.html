@@ -48,12 +48,12 @@
   <body is="x-ui-">
     <ui-rest id="main">
       <ui-tabbar>
-        <ui-before                                 ></ui-before>
-        <ui-tab class=""         data-tab="schemas">Schemas</ui-tab>
-        <ui-tab class="inactive" data-tab="icons"  >Icons</ui-tab>
+        <ui-before                                   ></ui-before>
+        <ui-tab class=""         data-tab="schemas"  >Schemas</ui-tab>
+        <ui-tab class="inactive" data-tab="icons"    >Icons</ui-tab>
         <ui-tab class="inactive" data-tab="endpoints">Endpoints</ui-tab>
-        <ui-behind                                 ></ui-behind>
-        <ui-last                                   ><a class="logo" href=".."></a></ui-last>
+        <ui-behind                                   ></ui-behind>
+        <ui-last                                     ><a class="logo" href=".."></a></ui-last>
       </ui-tabbar>
       <ui-content class="noselect">
         <ui-area data-belongs-to-tab="schemas" class="listcolumn"> <!--{{{-->
@@ -211,18 +211,146 @@
         </ui-area> <!--}}}-->
         <ui-resizehandle data-belongs-to-tab="endpoints" title="drag to resize" class="inactive"></ui-resizehandle>
         <ui-area data-belongs-to-tab="endpoints" class="detailcolumn inactive" id="endpointdetail"> <!--{{{-->
-          <div class="nothing">Select an endpoint on the left, or create a new one.</div>
-          <div class="detail hidden">
-            <div class="head">
-              <h1>Endpoint "<span class="name"></span>"</h1>
-            </div>
-            <h2>Properties</h2>
-            <div class="form" id="endpointform"></div>
-            <p class="buttons">
-              <button name="save" title="Ctrl+S" disabled>Save</button>
-              <button name="revert" disabled>Revert</button>
-            </p>
-          </div>
+          <ui-tabbar>
+            <ui-before                                ></ui-before>
+            <ui-tab class=""         data-tab="props" >Properties</ui-tab>
+            <ui-tab class="inactive" data-tab="schema">Schema</ui-tab>
+            <ui-tab class="inactive" data-tab="icon"  >Icon</ui-tab>
+            <ui-tab class="inactive" data-tab="desc"  >Description</ui-tab>
+            <ui-behind                                 ></ui-behind>
+          </ui-tabbar>
+          <ui-content>
+            <ui-area data-belongs-to-tab="props" class="detailcolumn" id="endpointprops"> <!--{{{-->
+              <div class="nothing">Select an endpoint on the left, or create a new one.</div>
+              <div class="detail hidden">
+                <div class="head">
+                  <h1>Endpoint "<span class="name"></span>"</h1>
+                </div>
+                <h2>Properties</h2>
+                <div class="form" id="endpointform"></div>
+                <p class="buttons">
+                  <button name="save" title="Ctrl+S" disabled>Save</button>
+                  <button name="revert" disabled>Revert</button>
+                </p>
+              </div>
+            </ui-area> <!--}}}-->
+            <ui-area data-belongs-to-tab="schema" class="detailcolumn inactive" id="endpointschema"> <!--{{{-->
+              <div class="nothing">Select an endpoint on the left, or create a new one.</div>
+              <div class="detail hidden">
+                <div class="head">
+                  <h1>Endpoint "<span class="name"></span>"</h1>
+                </div>
+                <p class="source">
+                  <label><input type="radio" name="epschema-source" value=""/> No schema</label>
+                  <label><input type="radio" name="epschema-source" value="own"/> Own schema</label>
+                  <label><input type="radio" name="epschema-source" value="global"/> Link to a global schema</label>
+                </p>
+                <div class="globals hidden">
+                  <input type="search" class="filter" placeholder="Filter by name"/>
+                  <div class="globallist">
+                    <table class="ui-table"><tbody></tbody></table>
+                  </div>
+                </div>
+                <div class="own">
+                  <div class="editor" data-part="schema" data-label="RelaxNG schema"></div>
+                  <p class="buttons">
+                    <button name="save" title="Ctrl+S" disabled>Save</button>
+                    <button name="revert" disabled>Revert</button>
+                  </p>
+                </div>
+                <div class="shown">
+                  <h2>Preview</h2>
+                  <div class="preview"></div>
+                </div>
+              </div>
+            </ui-area> <!--}}}-->
+            <ui-area data-belongs-to-tab="icon" class="detailcolumn inactive" id="endpointicon"> <!--{{{-->
+              <div class="nothing">Select an endpoint on the left, or create a new one.</div>
+              <div class="detail hidden">
+                <div class="head">
+                  <h1>Endpoint "<span class="name"></span>"</h1>
+                </div>
+                <p class="source">
+                  <label><input type="radio" name="epsymbol-source" value=""/> No icon</label>
+                  <label><input type="radio" name="epsymbol-source" value="own"/> Own icon</label>
+                  <label><input type="radio" name="epsymbol-source" value="global"/> Link to a global icon</label>
+                </p>
+                <div class="globals hidden">
+                  <input type="search" class="filter" placeholder="Filter by name"/>
+                  <div class="globallist">
+                    <table class="ui-table"><tbody></tbody></table>
+                  </div>
+                </div>
+                <div class="own">
+                  <h2>Normal (no label)</h2>
+                  <div class="editor" data-part="normal" data-label="SVG elements of part-normal"></div>
+                  <h2>Start</h2>
+                  <div class="editor" data-part="start"  data-label="SVG elements of part-start"></div>
+                  <h2>Middle (label)</h2>
+                  <div class="editor" data-part="middle" data-label="SVG elements of part-middle"></div>
+                  <h2>End</h2>
+                  <div class="editor" data-part="end"    data-label="SVG elements of part-end"></div>
+                  <p class="buttons">
+                    <button name="save" title="Ctrl+S" disabled>Save</button>
+                    <button name="revert" disabled>Revert</button>
+                  </p>
+                </div>
+                <div class="shown">
+                  <h2>Preview</h2>
+                  <div class="error hidden"></div>
+                  <div class="note hidden">
+                    <p class="onlynormal">Only a normal part: the icon has no place for a label, so no label is shown, also in themes with labels.</p>
+                    <p class="fallback">Empty parts (<span class="parts"></span>) are taken from the default call symbol of the theme.</p>
+                    <p class="nostart">Without a start part, the normal part is used as start.</p>
+                    <p class="noend">With a middle but without an end part, the default end is removed as well, so the middle is not clipped after the label.</p>
+                    <p class="themes">Themes (<span class="themes"></span>) could not be loaded from <span class="url"></span>.</p>
+                  </div>
+                  <table class="preview" data-label="Task Label">
+                    <thead>
+                      <tr><th></th><th>normal</th><th>active</th><th>color</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr data-theme="preset"><th>Label</th><td></td><td data-state="active"></td><td data-color="#ffffcc"></td></tr>
+                      <tr data-theme="extended"><th>Narrow</th><td></td><td data-state="active"></td><td data-color="#ffffcc"></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </ui-area> <!--}}}-->
+            <ui-area data-belongs-to-tab="desc" class="detailcolumn inactive" id="endpointdesc"> <!--{{{-->
+              <div class="nothing">Select an endpoint on the left, or create a new one.</div>
+              <div class="detail hidden">
+                <div class="head">
+                  <h1>Endpoint "<span class="name"></span>"</h1>
+                </div>
+                <div class="note">
+                  <p>Descriptions (Markdown) tell agents what the endpoint is for. Each part is optional; endpoints with at least one part are agents' endpoints.</p>
+                </div>
+                <div class="descpart" data-part="endpoint">
+                  <h2>Endpoint <button name="add">Add</button><button name="delete">Delete</button></h2>
+                  <div class="note">A short summary and keywords.</div>
+                  <div class="absent">Not described.</div>
+                  <div class="editor" data-part="endpoint" data-label="Endpoint"></div>
+                </div>
+                <div class="descpart" data-part="functionality">
+                  <h2>Functionality <button name="add">Add</button><button name="delete">Delete</button></h2>
+                  <div class="note">What the endpoint does, and its parameters.</div>
+                  <div class="absent">Not described.</div>
+                  <div class="editor" data-part="functionality" data-label="Functionality"></div>
+                </div>
+                <div class="descpart" data-part="output">
+                  <h2>Output <button name="add">Add</button><button name="delete">Delete</button></h2>
+                  <div class="note">What the endpoint returns, and how to access it.</div>
+                  <div class="absent">Not described.</div>
+                  <div class="editor" data-part="output" data-label="Output"></div>
+                </div>
+                <p class="buttons">
+                  <button name="save" title="Ctrl+S" disabled>Save</button>
+                  <button name="revert" disabled>Revert</button>
+                </p>
+              </div>
+            </ui-area> <!--}}}-->
+          </ui-content>
         </ui-area> <!--}}}-->
       </ui-content>
     </ui-rest>
@@ -278,6 +406,19 @@
     <ui-dialogue class="delete">
       <p>Delete "<span class="name"></span>"? This can not be undone.</p>
       <button>delete</button>
+    </ui-dialogue>
+    <ui-dialogue class="replace">
+      <p data-case="own">The own <span class="what"></span> of "<span class="name"></span>" is removed. Continue?</p>
+      <p data-case="link">The link of "<span class="name"></span>" to the global <span class="what"></span> "<span class="global"></span>" is removed. Continue?</p>
+      <p data-case="edits">The unsaved changes to the own <span class="what"></span> of "<span class="name"></span>" are lost. Continue?</p>
+      <button name="yes">Yes</button>
+      <button name="no">No</button>
+    </ui-dialogue>
+    <ui-dialogue class="descdelete">
+      <p data-case="saved">The <span class="part"></span> description of "<span class="name"></span>" is deleted. Continue?</p>
+      <p data-case="edits">The unsaved <span class="part"></span> description of "<span class="name"></span>" is removed. Continue?</p>
+      <button name="yes">Yes</button>
+      <button name="no">No</button>
     </ui-dialogue>
     <ui-dialogue class="discard">
       <p>"<span class="name"></span>" has unsaved changes. Discard them?</p>

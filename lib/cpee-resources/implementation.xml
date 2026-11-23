@@ -79,8 +79,10 @@
       <parameter name="exists" mimetype="text/plain"/>
     </choice>
   </message>
-  <message name="description-file">
-    <parameter name="*" mimetype="text/markdown"/>
+  <message name="description-file"> <!-- empty is a description too, only delete removes it -->
+    <optional>
+      <parameter name="*" mimetype="text/markdown"/>
+    </optional>
   </message>
 
   <resource>
