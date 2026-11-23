@@ -69,6 +69,9 @@ var current = {
   epdesc: { name: undefined, orig: {}, editors: {}, present: {} }
 };
 const DESCPARTS = ['endpoint','functionality','output'];
+const EPKINDS = ['epschema','epsymbol','epdesc']; // what an endpoint has besides its properties, each in its own tab
+const EDITORS = { schemas: ['schema'], symbols: PARTS, epschema: ['schema'], epsymbol: PARTS, epdesc: DESCPARTS };
+const TABS = { schemas: 'schemas', icons: 'symbols', endpoints: 'endpoints', props: 'endpoints', schema: 'epschema', icon: 'epsymbol', desc: 'epdesc' };
 const TYPE = { schemas: 'schema', symbols: 'icon', epschema: 'schema', epsymbol: 'icon' };
 const EPFILE = {
   epschema: { file: 'schema.rng', global: 'schemas', mimetype: 'text/xml',      prop: 'global-schema', what: 'schema' },
@@ -109,6 +112,16 @@ function editor_get(ed) { //{{{
 function editor_set(ed,text) { //{{{
   ed.find('ol[contenteditable]').set_val(text);
 } //}}}
+function editor_fill(kind,p,text) { //{{{
+  // as saved, orig is what the editor makes of it
+  editor_set(current[kind].editors[p],text);
+  current[kind].orig[p] = editor_get(current[kind].editors[p]);
+} //}}}
+function checkpoint(kind) { //{{{
+  // what the editors hold is saved now
+  let cur = current[kind];
+  Object.keys(cur.editors).forEach((p) => { cur.orig[p] = editor_get(cur.editors[p]); });
+} //}}}
 function changed(kind) { //{{{
   let cur = current[kind];
   if (cur.name == undefined) { return false; }
@@ -127,7 +140,7 @@ function edited(kind) { //{{{
 } //}}}
 function dirty(kind) { //{{{
   // an endpoint also has unsaved changes when its schema, icon or description has
-  return kind == 'endpoints' ? ['endpoints','epschema','epsymbol','epdesc'].some((k) => changed(k)) : changed(kind);
+  return kind == 'endpoints' ? ['endpoints',...EPKINDS].some((k) => changed(k)) : changed(kind);
 } //}}}
 function update_state(kind) { //{{{
   // save and revert are only active when there is something to save or revert
@@ -156,6 +169,11 @@ function path(kind,name) { //{{{
   if (kind == 'endpoints') { return server + 'endpoints/' + encodeURIComponent(name); }
   return server + kind + '/' + name;
 } //}}}
+function visible() { //{{{
+  // the kind whose tab is shown
+  let kind = TABS[$('#main > ui-tabbar > ui-tab:not(.inactive)').attr('data-tab')];
+  return kind == 'endpoints' ? TABS[$('#endpointdetail > ui-tabbar > ui-tab:not(.inactive)').attr('data-tab')] : kind;
+} //}}}
 function row(kind,name) { //{{{
   return $('tbody tr:not(.new)',list(kind)).filter((_,r) => $(r).attr('data-name') == name);
 } //}}}
@@ -181,11 +199,39 @@ function dialogue(cls,target,text,action) { //{{{
   dlg.off('click.action').on('click.action','button',(e) => action(dlg,$(e.currentTarget)));
   return dlg;
 } //}}}
+function only(dlg,attr,val) { //{{{
+  // the one paragraph of the dialogue that fits
+  $('p[' + attr + ']',dlg).addClass('hidden');
+  $('p[' + attr + '=' + val + ']',dlg).removeClass('hidden');
+} //}}}
+function ask(cls,target,text,why,yes,no) { //{{{
+  // a yes/no dialogue, the case why its text. No, the close button or a click outside is no
+  let ok = false;
+  let dlg = dialogue(cls,target,text,(d,button) => {
+    ok = button.attr('name') == 'yes';
+    uidash_dialogue_close(d);
+  });
+  only(dlg,'data-case',why);
+  dlg.off('uidash:dialogue_close').one('uidash:dialogue_close',() => { if (ok) { yes(); } else if (no) { no(); } });
+  return dlg;
+} //}}}
 function failed(what,target,text,status) { //{{{
   let dlg = dialogue('failed',target,text);
-  $('p[data-action]',dlg).addClass('hidden');
-  $('p[data-action=' + what + ']',dlg).removeClass('hidden');
+  only(dlg,'data-action',what);
   $('span.status',dlg).text(status);
+} //}}}
+function delete_item(kind,name,target) { //{{{
+  $.ajax({
+    type: 'DELETE',
+    url: path(kind,name),
+    error: (xhr) => { failed('delete',target,label(kind,name),xhr.status); }
+  });
+} //}}}
+function drawing(adaptor,td) { //{{{
+  // an svg for adaptor in td. It has to be in the document, so that it can be measured
+  let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td);
+  adaptor.set_svg_container(svg);
+  return svg;
 } //}}}
 function show_error(kind,msg) { //{{{
   if (TYPE[kind] == 'schema') { // in place of the preview
@@ -278,8 +324,7 @@ function thumbnail(name,td,text) { //{{{
     td.empty();
     try {
       icons[name] = icon;
-      let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td); // has to be in the document, so that it can be measured
-      adaptors['extended'].set_svg_container(svg);
+      let svg = drawing(adaptors['extended'],td);
       let g = adaptors['extended'].draw_element('call', 'thumbnail-' + (uid++), $('#iconpreview').attr('data-label'), { info: { 'element-endpoint': name } });
       // symbol -> svg coordinates, incl. the group translate of set_svg. From the transforms
       // themselves, getCTM does not work here, the list is drawn while its tab is hidden
@@ -311,9 +356,7 @@ function events(resync = false) { //{{{
     if (!current[kind]) { return; }
     if (kind == 'endpoints') { load_agents(); } // e.g. a copy has the descriptions of the original
     if (kind == 'endpoints' && ev.op == 'update' && current.endpoints.name == ev.name) { // also its schema, icon or description
-      ep_load('epschema');
-      ep_load('epsymbol');
-      desc_load();
+      EPKINDS.forEach((k) => load_part(k));
     }
     Object.keys(EPFILE).forEach((k) => { // the global one the endpoint links to
       if (EPFILE[k].global == kind && current[k].name != undefined && current[k].source == ev.name) { ep_load(k); }
@@ -367,10 +410,8 @@ function show_item(kind,name,text) { //{{{
   current[kind].name = name;
   $('tbody tr',list(kind)).removeClass('selected');
   row(kind,name).addClass('selected');
-  let det = detail(kind);
-  $('div.nothing',det).addClass('hidden');
-  $('div.detail',det).removeClass('hidden');
-  $('div.head h1 span.name',det).text(label(kind,name));
+  show_detail(kind,true);
+  $('div.head h1 span.name',detail(kind)).text(label(kind,name));
   if (kind == 'endpoints') {
     properties_rng.then((rng) => {
       // a new form each time, content would add to the rows already there
@@ -383,19 +424,22 @@ function show_item(kind,name,text) { //{{{
       update_state(kind);
     });
     // unsaved changes of the schema, icon or description are only dropped for another endpoint
-    ['epschema','epsymbol'].forEach((k) => ep_load(k,current[k].name != name));
-    desc_load(current.epdesc.name != name);
+    EPKINDS.forEach((k) => load_part(k,current[k].name != name));
     return;
   }
   fill(kind,text);
   update_state(kind);
   update_preview(kind);
 } //}}}
+function show_detail(kind,on) { //{{{
+  // the detail of the selected item, or the placeholder
+  $('div.nothing',detail(kind)).toggleClass('hidden',on);
+  $('div.detail',detail(kind)).toggleClass('hidden',!on);
+} //}}}
 function fill(kind,text) { //{{{
   // the editors of a schema or icon, as saved
   if (TYPE[kind] == 'schema') {
-    editor_set(current[kind].editors.schema,text.replace(/\s+$/,''));
-    current[kind].orig.schema = editor_get(current[kind].editors.schema);
+    editor_fill(kind,'schema',text.trimEnd());
   } else {
     load_icon(kind,text);
   }
@@ -410,20 +454,19 @@ function shows(kind,text) { //{{{
       let a = form_props(), b = plain_props(JSON.parse(text));
       return Object.keys(a).length == Object.keys(b).length && Object.keys(a).every((k) => a[k] === b[k]);
     }
-    if (TYPE[kind] == 'schema') { return editor_get(current[kind].editors.schema) == text.replace(/\s+$/,''); }
+    if (TYPE[kind] == 'schema') { return editor_get(current[kind].editors.schema) == text.trimEnd(); }
     return $(compose_icon(kind)).serializePrettyXML() == text;
   } catch(e) {
     return false;
   }
 } //}}}
 function unselect(kind) { //{{{
-  (kind == 'endpoints' ? ['endpoints','epschema','epsymbol','epdesc'] : [kind]).forEach((k) => {
+  (kind == 'endpoints' ? ['endpoints',...EPKINDS] : [kind]).forEach((k) => {
     current[k].name = undefined;
     current[k].orig = {};
   });
   if (kind == 'endpoints') { current.epdesc.present = {}; }
-  $('div.nothing',detail(kind)).removeClass('hidden');
-  $('div.detail',detail(kind)).addClass('hidden');
+  show_detail(kind,false);
 } //}}}
 function load_icon(kind,text) { //{{{
   let cur = current[kind];
@@ -455,10 +498,7 @@ function load_icon(kind,text) { //{{{
     cur.root = undefined;
     parts.normal = text;
   }
-  PARTS.forEach((p) => {
-    editor_set(cur.editors[p],parts[p] || '');
-    cur.orig[p] = editor_get(cur.editors[p]);
-  });
+  PARTS.forEach((p) => editor_fill(kind,p,parts[p] || ''));
 } //}}}
 function compose_icon(kind) { //{{{
   // returns the icon document from the four editors, throws on errors
@@ -515,7 +555,7 @@ function save(kind) { //{{{
     return;
   }
   put(kind,cur.name,text,button,() => {
-    Object.keys(cur.editors).forEach((p) => { cur.orig[p] = editor_get(cur.editors[p]); });
+    checkpoint(kind);
     update_state(kind);
   });
 } //}}}
@@ -541,14 +581,21 @@ function template(kind) { //{{{
 /* }}} */
 
 /* schema and icon of an endpoint {{{ */
+function load_part(kind,force = false) { //{{{
+  // schema, icon or description of the selected endpoint. Unsaved changes are kept unless forced
+  if (kind == 'epdesc') { desc_load(force); } else { ep_load(kind,force); }
+} //}}}
+function outdated(kind,name,force) { //{{{
+  // when loaded: meanwhile another endpoint is selected, or there are changes to keep
+  return name == undefined || current.endpoints.name != name || (!force && changed(kind));
+} //}}}
 function ep_url(kind) { //{{{
   return path('endpoints',current.endpoints.name) + '/' + EPFILE[kind].file;
 } //}}}
-function ep_load(kind,force = false) { //{{{
-  // what the endpoint has: none, a link to a global one, or its own. Unsaved
-  // changes are kept unless forced
+function ep_load(kind,force) { //{{{
+  // what the endpoint has: none, a link to a global one, or its own
   let name = current.endpoints.name;
-  if (name == undefined || (!force && changed(kind))) { return; }
+  if (outdated(kind,name,force)) { return; }
   $.ajax({
     type: 'GET',
     url: path('endpoints',name) + '/properties.json',
@@ -566,7 +613,7 @@ function ep_load(kind,force = false) { //{{{
   });
 } //}}}
 function ep_show(kind,name,source,text,force) { //{{{
-  if (current.endpoints.name != name || (!force && changed(kind))) { return; } // meanwhile another endpoint or changes
+  if (outdated(kind,name,force)) { return; }
   let cur = current[kind];
   cur.name = name;
   cur.source = source;
@@ -655,16 +702,7 @@ function ep_choose(kind,val,target) { //{{{
   else if (val == '' && ep_global(cur.source)) { why = 'link'; }
   else if (val != 'own' && cur.mode == 'own' && edited(kind)) { why = 'edits'; }
   if (why) {
-    let yes = false;
-    let dlg = dialogue('replace',target,cur.name,(d,button) => {
-      yes = button.attr('name') == 'yes';
-      uidash_dialogue_close(d);
-    });
-    dlg.off('uidash:dialogue_close').one('uidash:dialogue_close',() => { // no, close button or click outside: back to what is active
-      if (yes) { go(); } else { ep_state(kind); }
-    });
-    $('p[data-case]',dlg).addClass('hidden');
-    $('p[data-case=' + why + ']',dlg).removeClass('hidden');
+    let dlg = ask('replace',target,cur.name,why,go,() => ep_state(kind)); // no: back to what is active
     $('span.what',dlg).text(EPFILE[kind].what);
     $('span.global',dlg).text(base(cur.source));
     return;
@@ -684,7 +722,7 @@ function ep_save(kind,text,button) { //{{{
     contentType: false,
     success: () => {
       cur.source = 'own';
-      Object.keys(cur.editors).forEach((p) => { cur.orig[p] = editor_get(cur.editors[p]); });
+      checkpoint(kind);
       update_state(kind);
     },
     error: (xhr) => { failed('save',button,cur.name,xhr.status); }
@@ -693,8 +731,8 @@ function ep_save(kind,text,button) { //{{{
 /* }}} */
 
 /* descriptions of an endpoint {{{ */
-function desc_url(part) { //{{{
-  return path('endpoints',current.endpoints.name) + '/descriptions/' + part + '.md';
+function desc_url(part,name = current.endpoints.name) { //{{{
+  return path('endpoints',name) + '/descriptions/' + part + '.md';
 } //}}}
 function desc_changed(part) { //{{{
   // added and not saved yet, or edited. Deleting is not a change, it is done at once
@@ -702,10 +740,10 @@ function desc_changed(part) { //{{{
   if (!cur.present[part]) { return false; }
   return cur.orig[part] === undefined || editor_get(cur.editors[part]) != cur.orig[part];
 } //}}}
-function desc_load(force = false) { //{{{
-  // the parts the endpoint has. Unsaved changes are kept unless forced
+function desc_load(force) { //{{{
+  // the parts the endpoint has
   let name = current.endpoints.name;
-  if (name == undefined || (!force && changed('epdesc'))) { return; }
+  if (outdated('epdesc',name,force)) { return; }
   $.ajax({
     type: 'GET',
     url: path('endpoints',name) + '/descriptions/',
@@ -714,7 +752,7 @@ function desc_load(force = false) { //{{{
       let have = $('resource',res).map((_,r) => $(r).text()).get();
       Promise.all(DESCPARTS.map((p) => !have.includes(p + '.md') ? undefined : $.ajax({
         type: 'GET',
-        url: path('endpoints',name) + '/descriptions/' + p + '.md',
+        url: desc_url(p,name),
         dataType: 'text'
       }).catch(() => undefined))).then((texts) => desc_show(name,texts,force));
     },
@@ -722,14 +760,13 @@ function desc_load(force = false) { //{{{
   });
 } //}}}
 function desc_show(name,texts,force) { //{{{
-  if (current.endpoints.name != name || (!force && changed('epdesc'))) { return; } // meanwhile another endpoint or changes
+  if (outdated('epdesc',name,force)) { return; }
   let cur = current.epdesc;
   cur.name = name;
   DESCPARTS.forEach((p,i) => {
-    let text = texts[i];
-    cur.present[p] = text !== undefined;
-    editor_set(cur.editors[p],text === undefined ? '' : text.replace(/\s+$/,''));
-    cur.orig[p] = text === undefined ? undefined : editor_get(cur.editors[p]);
+    cur.present[p] = texts[i] !== undefined;
+    editor_fill('epdesc',p,cur.present[p] ? texts[i].trimEnd() : '');
+    if (!cur.present[p]) { cur.orig[p] = undefined; }
   });
   desc_state();
 } //}}}
@@ -762,16 +799,7 @@ function desc_delete(part,target) { //{{{
   };
   let saved = cur.orig[part] !== undefined;
   if (!saved && editor_get(cur.editors[part]).trim() == '') { remove(); return; }
-  let yes = false;
-  let dlg = dialogue('descdelete',target,cur.name,(d,button) => {
-    yes = button.attr('name') == 'yes';
-    uidash_dialogue_close(d);
-  });
-  $('p[data-case]',dlg).addClass('hidden');
-  $('p[data-case=' + (saved ? 'saved' : 'edits') + ']',dlg).removeClass('hidden');
-  $('span.part',dlg).text($('div.descpart[data-part=' + part + '] div.editor',detail('epdesc')).attr('data-label'));
-  dlg.off('uidash:dialogue_close').one('uidash:dialogue_close',() => { // no, close button or click outside: nothing happens
-    if (!yes) { return; }
+  let dlg = ask('descdelete',target,cur.name,saved ? 'saved' : 'edits',() => {
     if (!saved) { remove(); return; }
     $.ajax({
       type: 'DELETE',
@@ -780,6 +808,7 @@ function desc_delete(part,target) { //{{{
       error: (xhr) => { failed('delete',target,cur.name,xhr.status); }
     });
   });
+  $('span.part',dlg).text(cur.editors[part].attr('data-label'));
 } //}}}
 function desc_save(button) { //{{{
   // the added and edited parts, each as its own file
@@ -812,37 +841,30 @@ function create(kind,nbase,target) { //{{{
     select(kind,name,target);
     return;
   }
+  let created = () => {
+    $('input',dlg).val('');
+    current[kind].name = undefined; // nothing to discard anymore
+    select(kind,name,target);
+  };
   leave_ok(kind,target,() => {
     if (kind == 'endpoints') {
       $.ajax({
         type: 'POST',
         url: server + 'endpoints/',
         data: { name: name },
-        success: () => {
-          $('input',dlg).val('');
-          current[kind].name = undefined; // nothing to discard anymore
-          select(kind,name,target);
-        },
+        success: created,
         error: (xhr) => { failed('save',target,name,xhr.status); }
       });
-      return;
+    } else {
+      put(kind,name,template(kind),target,created);
     }
-    put(kind,name,template(kind),target,() => {
-      $('input',dlg).val('');
-      current[kind].name = undefined; // nothing to discard anymore
-      select(kind,name,target);
-    });
   });
 } //}}}
 function delete_it(kind,name) { //{{{
   let target = $('td[data-class=ops]',row(kind,name));
   dialogue('delete',target,label(kind,name),(dlg) => {
     uidash_dialogue_close(dlg);
-    $.ajax({
-      type: 'DELETE',
-      url: path(kind,name),
-      error: (xhr) => { failed('delete',target,label(kind,name),xhr.status); }
-    });
+    delete_item(kind,name,target);
   });
 } //}}}
 function copy_it(kind,name,remove) { //{{{
@@ -873,15 +895,11 @@ function copy_it(kind,name,remove) { //{{{
       // before the delete, its event must not close the renamed item
       if (current[kind].name == name) {
         current[kind].name = nname;
-        if (kind == 'endpoints') { ['epschema','epsymbol','epdesc'].forEach((k) => { if (current[k].name == name) { current[k].name = nname; } }); }
+        if (kind == 'endpoints') { EPKINDS.forEach((k) => { if (current[k].name == name) { current[k].name = nname; } }); }
         $('div.head h1 span.name',detail(kind)).text(label(kind,nname));
         row(kind,nname).addClass('selected');
       }
-      $.ajax({
-        type: 'DELETE',
-        url: path(kind,name),
-        error: (xhr) => { failed('delete',target,label(kind,name),xhr.status); }
-      });
+      delete_item(kind,name,target);
     };
     if (kind == 'endpoints') { // with all its files, the service copies it
       $.ajax({
@@ -962,8 +980,7 @@ function update_preview(kind) { //{{{
       let theme = $(td).closest('tr').attr('data-theme');
       if (!adaptors[theme]) { return; }
       try {
-        let svg = $(document.createElementNS(SVGNS,'svg')).appendTo(td); // has to be in the document, so that it can be measured
-        adaptors[theme].set_svg_container(svg);
+        drawing(adaptors[theme],td);
         adaptors[theme].draw_element('call', 'preview-' + (uid++), table.attr('data-label'), { info: { 'element-endpoint': key }, state: $(td).attr('data-state'), style: $(td).attr('data-color') ? { 'fill': $(td).attr('data-color') } : {} });
       } catch(e) {
         $(td).text(e.message);
@@ -1024,18 +1041,87 @@ function load_themes() { //{{{
 } //}}}
 /* }}} */
 
-$(document).ready(function() {
-  // editors
-  current.schemas.editors.schema = create_editor($('#schemadetail div.editor[data-part=schema]'));
-  PARTS.forEach((p) => {
-    current.symbols.editors[p] = create_editor($('#icondetail div.editor[data-part=' + p + ']'));
+/* bindings {{{ */
+function bind_editing(kind) { //{{{
+  // editors, save and revert, all kinds
+  $('div.editor, div.form',area(kind)).on('input relaxngui_change paste',() => {
+    update_state(kind);
+    clearTimeout(preview_timer);
+    preview_timer = setTimeout(() => update_preview(kind), 400);
   });
-  current.epschema.editors.schema = create_editor($('#endpointschema div.editor[data-part=schema]'));
-  PARTS.forEach((p) => {
-    current.epsymbol.editors[p] = create_editor($('#endpointicon div.editor[data-part=' + p + ']'));
+  $('button[name=save]',area(kind)).on('click',() => save(kind));
+  $('button[name=revert]',area(kind)).on('click',(e) => {
+    if (!changed(kind)) { return; }
+    if (EPKINDS.includes(kind)) { load_part(kind,true); } else { select(kind,current[kind].name,$(e.currentTarget)); }
   });
+} //}}}
+function bind_list(kind) { //{{{
+  // select, filter, create, and the operations of the rows
+  let tab = list(kind);
+  $('input.filter[data-kind=' + kind + ']').on('input',() => filter(kind));
+  tab.on('click','tbody tr:not(.new) td:not([data-class=ops])',(e) => {
+    let tr = $(e.currentTarget).closest('tr');
+    select(kind,tr.attr('data-name'),$('td[data-class=name]',tr));
+  });
+  let dlg = $('ui-dialogue.new[data-kind=' + kind + ']');
+  tab.on('click','tr.new',(e) => {
+    uidash_dialogue(dlg,$('td[data-class=add]',e.currentTarget));
+    $('input',dlg).focus();
+  });
+  let submit = () => {
+    let inp = $('input',dlg);
+    if (inp[0].reportValidity()) { create(kind,inp.val(),$('tr.new td[data-class=add]',tab)); }
+  };
+  dlg.on('click','button',submit);
+  dlg.on('keydown','input',(e) => { if (e.key == 'Enter') { e.preventDefault(); submit(); } });
+  let ops_menu = (e) => {
+    e.preventDefault();
+    let tr = $(e.currentTarget).closest('tr');
+    let name = tr.attr('data-name');
+    let item = (lab,icon,fun,params) => ({ 'label': lab, 'function_call': fun, 'text_icon': '<i class="uidash-icon uidash-icon-' + icon + '"></i>', 'type': undefined, 'params': params });
+    tr.addClass('active');
+    new CustomMenu(e).contextmenu({ 'Operations': [
+      item('Duplicate','copy',copy_it,[kind,name,false]),
+      item('Rename','rename',copy_it,[kind,name,true]),
+      item('Delete','delete',delete_it,[kind,name])
+    ]});
+  };
+  tab.on('click','tbody tr:not(.new) td[data-class=ops]',ops_menu);
+  tab.on('contextmenu','tbody tr:not(.new)',ops_menu);
+} //}}}
+function bind_epfile(kind) { //{{{
+  // none, own or a global one for the schema or icon of an endpoint
+  let det = detail(kind);
+  $('p.source input',det).on('change',(e) => {
+    let val = $(e.currentTarget).val();
+    if (val == 'global' && ep_global(current[kind].source)) { // the link was only replaced by unsaved own, it still exists
+      ep_choose(kind,current[kind].source,$(e.currentTarget).parent());
+    } else if (val == 'global') { // linked when one is clicked
+      $('div.globals',det).removeClass('hidden');
+      ep_options(kind);
+      ep_center(kind);
+      $('div.globals input.filter',det).focus();
+    } else {
+      $('div.globals',det).addClass('hidden');
+      ep_choose(kind,val,$(e.currentTarget).parent());
+    }
+  });
+  $('div.globals input.filter',det).on('input',() => ep_options(kind));
+  $('div.globals tbody',det).on('click','tr',(e) => ep_choose(kind,$(e.currentTarget).attr('data-name'),$('td[data-class=name]',e.currentTarget)));
+} //}}}
+function bind_desc() { //{{{
+  // add and delete the parts of a description
   DESCPARTS.forEach((p) => {
-    current.epdesc.editors[p] = create_editor($('#endpointdesc div.editor[data-part=' + p + ']'));
+    let part = $('div.descpart[data-part=' + p + ']',detail('epdesc'));
+    $('button[name=add]',part).on('click',() => desc_add(p));
+    $('button[name=delete]',part).on('click',(e) => desc_delete(p,$(e.currentTarget)));
+  });
+} //}}}
+/* }}} */
+
+$(document).ready(function() {
+  Object.keys(EDITORS).forEach((kind) => {
+    EDITORS[kind].forEach((p) => { current[kind].editors[p] = create_editor($('div.editor[data-part=' + p + ']',area(kind))); });
   });
   $('div.help div.fold').on('click',(e) => {
     if ($(e.target).closest('a').length > 0) { return; }
@@ -1044,80 +1130,9 @@ $(document).ready(function() {
   properties_rng = new Promise((resolve) => {
     $.ajax({ type: 'GET', url: 'rngs/properties.rng', dataType: 'xml', success: resolve });
   });
-  ['schemas','symbols','endpoints','epschema','epsymbol','epdesc'].forEach((kind) => {
-    $('div.editor, div.form',area(kind)).on('input relaxngui_change paste',() => {
-      update_state(kind);
-      clearTimeout(preview_timer);
-      preview_timer = setTimeout(() => update_preview(kind), 400);
-    });
-    $('button[name=save]',area(kind)).on('click',() => save(kind));
-    $('button[name=revert]',area(kind)).on('click',(e) => {
-      if (!changed(kind)) { return; }
-      if (kind == 'epdesc') { desc_load(true); }
-      else if (EPFILE[kind]) { ep_load(kind,true); }
-      else { select(kind,current[kind].name,$(e.currentTarget)); }
-    });
-    if (kind == 'epdesc') {
-      DESCPARTS.forEach((p) => {
-        let part = $('div.descpart[data-part=' + p + ']',detail(kind));
-        $('button[name=add]',part).on('click',() => desc_add(p));
-        $('button[name=delete]',part).on('click',(e) => desc_delete(p,$(e.currentTarget)));
-      });
-      return;
-    }
-    if (EPFILE[kind]) {
-      let det = detail(kind);
-      $('p.source input',det).on('change',(e) => {
-        let val = $(e.currentTarget).val();
-        if (val == 'global' && ep_global(current[kind].source)) { // the link was only replaced by unsaved own, it still exists
-          ep_choose(kind,current[kind].source,$(e.currentTarget).parent());
-        } else if (val == 'global') { // linked when one is clicked
-          $('div.globals',det).removeClass('hidden');
-          ep_options(kind);
-          ep_center(kind);
-          $('div.globals input.filter',det).focus();
-        } else {
-          $('div.globals',det).addClass('hidden');
-          ep_choose(kind,val,$(e.currentTarget).parent());
-        }
-      });
-      $('div.globals input.filter',det).on('input',() => ep_options(kind));
-      $('div.globals tbody',det).on('click','tr',(e) => ep_choose(kind,$(e.currentTarget).attr('data-name'),$('td[data-class=name]',e.currentTarget)));
-      return;
-    }
-
-    let tab = list(kind);
-    $('input.filter[data-kind=' + kind + ']').on('input',() => filter(kind));
-    tab.on('click','tbody tr:not(.new) td:not([data-class=ops])',(e) => {
-      let tr = $(e.currentTarget).closest('tr');
-      select(kind,tr.attr('data-name'),$('td[data-class=name]',tr));
-    });
-    let dlg = $('ui-dialogue.new[data-kind=' + kind + ']');
-    tab.on('click','tr.new',(e) => {
-      uidash_dialogue(dlg,$('td[data-class=add]',e.currentTarget));
-      $('input',dlg).focus();
-    });
-    let submit = () => {
-      let inp = $('input',dlg);
-      if (inp[0].reportValidity()) { create(kind,inp.val(),$('tr.new td[data-class=add]',tab)); }
-    };
-    dlg.on('click','button',submit);
-    dlg.on('keydown','input',(e) => { if (e.key == 'Enter') { e.preventDefault(); submit(); } });
-    let ops_menu = (e) => {
-      e.preventDefault();
-      let tr = $(e.currentTarget).closest('tr');
-      let name = tr.attr('data-name');
-      let menu = {};
-      menu['Operations'] = [
-        { 'label': 'Duplicate', 'function_call': copy_it,   'text_icon': '<i class="uidash-icon uidash-icon-copy"></i>',   'type': undefined, 'params': [kind,name,false] },
-        { 'label': 'Rename',    'function_call': copy_it,   'text_icon': '<i class="uidash-icon uidash-icon-rename"></i>', 'type': undefined, 'params': [kind,name,true] },
-        { 'label': 'Delete',    'function_call': delete_it, 'text_icon': '<i class="uidash-icon uidash-icon-delete"></i>', 'type': undefined, 'params': [kind,name] }
-      ];
-      tr.addClass('active');
-      new CustomMenu(e).contextmenu(menu);
-    };
-    tab.on('click','tbody tr:not(.new) td[data-class=ops]',ops_menu);
-    tab.on('contextmenu','tbody tr:not(.new)',ops_menu);
+  ['schemas','symbols','endpoints',...EPKINDS].forEach((kind) => {
+    bind_editing(kind);
+    if (kind == 'epdesc') { bind_desc(); } else if (EPFILE[kind]) { bind_epfile(kind); } else { bind_list(kind); }
   });
   $(document).on('mousedown',() => { $('table.ui-table tr.active').removeClass('active'); }); // CustomMenu closes on mousedown
   $('div.filterbar button.agents').on('click',(e) => {
@@ -1132,17 +1147,14 @@ $(document).ready(function() {
   $(document).on('keydown',(e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == 's') {
       e.preventDefault();
-      let kind = { schemas: 'schemas', icons: 'symbols', endpoints: 'endpoints' }[$('#main > ui-tabbar > ui-tab:not(.inactive)').attr('data-tab')];
-      if (kind == 'endpoints') { kind = { props: 'endpoints', schema: 'epschema', icon: 'epsymbol', desc: 'epdesc' }[$('#endpointdetail > ui-tabbar > ui-tab:not(.inactive)').attr('data-tab')]; }
-      if (kind) { save(kind); }
+      if (visible()) { save(visible()); }
     }
   });
-  // icons can only be measured when visible
-  document.addEventListener('uidash:activate_tab',(e) => {
-    if (e.detail.active == 'icons') { update_preview('symbols'); }
-    if (e.detail.active == 'icon' || e.detail.active == 'endpoints') { update_preview('epsymbol'); }
-    if (e.detail.active == 'schema' || e.detail.active == 'endpoints') { ep_center('epschema'); }
-    if (e.detail.active == 'icon' || e.detail.active == 'endpoints') { ep_center('epsymbol'); }
+  // icons and the list to link to can only be measured when visible
+  document.addEventListener('uidash:activate_tab',() => {
+    let kind = visible();
+    if (TYPE[kind] == 'icon') { update_preview(kind); }
+    if (EPFILE[kind]) { ep_center(kind); }
   });
   window.addEventListener('beforeunload',(e) => {
     if (changed('schemas') || changed('symbols') || dirty('endpoints')) { e.preventDefault(); e.returnValue = ''; }
